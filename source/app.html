@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>yousero/DONTTAP</title>
+  <title>yousero/DONTTAP</title>  
+  <meta name="description" content="donttap browser game">
+  <meta name="author" content="yousero">
   <style>
     * {
       box-sizing: border-box;
@@ -19,6 +21,7 @@
       font-size: 1em;
       line-height: 1;
       letter-spacing: 0.2px;
+      background: #000107;
     }
 
     h1, h2, h3, h4, h5 {
@@ -34,11 +37,30 @@
       text-decoration: none;
       color: deepskyblue;
     }
+
+    #header {
+      height: 60px;
+    }
+
+    #main {
+      display: flex;
+    }
+
+    #board {
+      margin: auto;
+    }
   </style>
 </head>
 <body>
-  <div id="app"></div>
+  <div id="app">
+    <header id="header"></header>
+    <main id="main">
+      <canvas id="board" width="100px" height="100px"></canvas>
+    </main>
+  </div>
   <script>
+    const appDiv = document.body.querySelector('#app')
+
     console.log('script ended')
   </script>
 </body>
