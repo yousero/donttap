@@ -22,7 +22,11 @@ jobs:
           git config user.email github-actions@github.com
           git pull origin pages --allow-unrelated-histories
           git checkout -b "pages"
-          rm -fr !(dist)
+    - run: |
+          mkdir trash
+          mv * trash
+          mv trash\dist .
+          rm -fr trash
           mv dist/* .
           mv app.html index.html
           git add .
