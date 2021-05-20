@@ -20,7 +20,7 @@ body {
   font-family: 'Tangerine', sans-serif;
   font-size: 1em;
   line-height: 1;
-  letter-spacing: 0.2px;
+  letter-spacing: 1.2px;
   background: #000107;
 }
 
@@ -68,6 +68,8 @@ a:hover {
 
 #canvas {
   cursor: crosshair;
+  padding: 20px;
+  user-select: none;
 }
 
 #information {

@@ -3,25 +3,27 @@ const canvasDiv = document.getElementById('canvas')
 
 const ctx = canvasDiv.getContext('2d')
 
-let h = 4
-let w = 4
+const h = 4
+const w = 4
 
-let bColor = '#ff0107'
-let fColor = '#f1f7ff'
-let aColor = '#000107'
+const bColor = '#ff0107'
+const fColor = '#f1f7ff'
+const aColor = '#000107'
 
-let cellSize = 100
-let bSize = 1
+const cellSize = 100
+const bSize = 1
 
 function renderSquare(x, y, cColor) {
+  console.log('renderSquare')
   ctx.fillStyle = cColor
   const rX = y * (cellSize + bSize) + bSize
   const rY = x * (cellSize + bSize) + bSize
   ctx.fillRect(rY, rX, cellSize, cellSize)
 }
 
-function render() {
-  ctx.fillStyle = bColor
+function render(_bColor = bColor, _fColor = fColor) {
+  console.log('render')
+  ctx.fillStyle = _bColor
   ctx.fillRect(
     0,
     0,
@@ -29,7 +31,7 @@ function render() {
     (cellSize + bSize) * w + bSize
   )
 
-  ctx.fillStyle = fColor
+  ctx.fillStyle = _fColor
 
   for (let y = 0; y < h; ++y) {
     for (let x = 0; x < w; ++x) {
@@ -41,6 +43,7 @@ function render() {
 }
 
 function renderBorders(sColor = bColor) {
+  console.log('renderBorders')
   ctx.strokeStyle = sColor
 
   for (let x = 0; x <= w; ++x) {
@@ -57,10 +60,15 @@ function renderBorders(sColor = bColor) {
 
 let speed = 0
 let clicks = 0
+let misses = 0
 let accuracy = 1
 
-let clock = 30.0
+const breakPoint = 4
+let missStreak = 0
+
+let clock = 0.0
 let startTime = new Date()
+let clickTime = startTime
 
 const clockDiv = document.getElementById('clock')
 const infoDiv = document.getElementById('information')
@@ -69,32 +77,52 @@ let timer = -1
 
 let gameMap = []
 
+function textNumber(number) {
+  tNumber = String(Math.round(number * 100) / 100)
+
+  if (tNumber.slice(-2, -1) == '.') tNumber += '0'
+  if (tNumber.slice(-3, -2) != '.') tNumber += '.00'
+
+  return tNumber
+}
+
+function gameover() {
+  console.log('gameover')
+  clearTimeout(timer)
+  clock = 0.0
+  clockDiv.classList.add('gameover')
+  render(bColor, aColor)
+}
+
 function run() {
-  const tSpeed = Math.round(speed * 100) / 100
-  const tClicks = Math.round(clicks * 100) / 100
-  const tAccuracy = Math.round(accuracy * 100) / 100
+  speed = clock ? clicks / clock : 0
+  accuracy = clicks ? clicks / (clicks + misses) : 1
+
+  const tSpeed = textNumber(speed)
+  const tClicks = textNumber(clicks)
+  const tAccuracy = textNumber(accuracy)
 
   infoDiv.textContent = `${tSpeed} / ${tClicks} / ${tAccuracy}`
 
   clock = (new Date() - startTime) / 1000
 
   if (clock > 0) {
-    let tClock = String(Math.round(clock * 100) / 100)
-    if (tClock.slice(-2, -1) == '.') tClock += '0'
-    if (tClock.slice(-3, -2) != '.') tClock += '.00'
-
-    clockDiv.textContent = tClock
-
-    setTimeout(run, 0)
+    clockDiv.textContent = textNumber(clock)
   } else {
     clockDiv.textContent = '0.00'
   }
+
+  if ((new Date() - clickTime) / 1000 > 8) {
+    gameover()
+  } else {
+    setTimeout(run, 0)
+  }
 }
 
-let activeCells = 3
-let clockTime = 30
+const activeCells = 3
 
 function start() {
+  console.log('start')
   clockDiv.classList.remove('gameover')
 
   for (let y = 0; y < h; ++y) {
@@ -102,6 +130,8 @@ function start() {
       gameMap.push(`${x}.${y}`)
     }
   }
+
+  render()
 
   for (let i = 0; i < activeCells; ++i) {
     let cell = gameMap[Math.floor(Math.random() * gameMap.length)]
@@ -112,46 +142,54 @@ function start() {
 
   speed = 0
   clicks = 0
+  misses = 0
   accuracy = 1
 
-  clock = clockTime
+  clock = 0.0
   startTime = new Date()
-  endTime = new Date(startTime)
+  clickTime = startTime
 
-  endTime.setMilliseconds(endTime.getMilliseconds() + clock * 1000)
-
-  //run()
+  run()
 }
 
-function gameover() {
-  console.log('gameover')
-  clockDiv.classList.add('gameover')
-  clearTimeout(timer)
-}
+function hit(event) {
+  console.log('hit')
 
-function click(event) {
-  const x = event.offsetX
-  const y = event.offsetY
+  clicks += 1
 
-  if (x == 0 || y == 0 || x == this.width || y == this.height) {
-    gameover()
-  } else {
-    const cellX = Math.floor((x - (x % (cellSize + bSize))) / cellSize)
-    const cellY = Math.floor((y - (y % (cellSize + bSize))) / cellSize)
+  if (clock) {
+    const x = event.offsetX
+    const y = event.offsetY
 
-    if (gameMap.includes(`${cellX}.${cellY}`)) {
-      gameover()
-      renderSquare(cellX, cellY, aColor)
+    if (x == 0 || y == 0 || x == this.width || y == this.height) {
+      misses += 1
+      missStreak += 1
     } else {
-      renderSquare(cellX, cellY, fColor)
+      const cellX = Math.floor((x - (x % (cellSize + bSize))) / cellSize)
+      const cellY = Math.floor((y - (y % (cellSize + bSize))) / cellSize)
+
+      if (gameMap.includes(`${cellX}.${cellY}`)) {
+        // renderSquare(cellX, cellY, aColor)
+        misses += 1
+        missStreak += 1
+      } else {
+        renderSquare(cellX, cellY, fColor)
+      }
     }
+
+    clickTime = new Date()
+
+    if (missStreak >= breakPoint) {
+      gameover()
+    }
+  } else {
+    start()
   }
 }
 
-// render()
-renderBorders()
-// start()
+render(bColor, aColor)
 
-canvasDiv.addEventListener('mousedown', click)
+// canvasDiv.addEventListener('touchstart', hit)
+canvasDiv.addEventListener('mousedown', hit)
 
 console.log('script ended')
