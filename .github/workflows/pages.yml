@@ -18,7 +18,8 @@ jobs:
     - run: | 
           npm ci
           npm run build
-          git checkout -b "pages" --set-upstream origin pages
+          git checkout -b "pages"
+          git pull --set-upstream origin pages
           rm -fr !(dist)
           mv dist/* .
           mv app.html index.html
