@@ -1,0 +1,3 @@
+function $2caad49fb91b2599568b6dd8f88222e1$export$9099ad97b570f7c(arr) {
+    if (Array.isArray(arr)) return arr;
+}
