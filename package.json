@@ -4,7 +4,7 @@
   "description": "donttap browser game",
   "scripts": {
     "start": "parcel serve ./source/app.html",
-    "build": "parcel build ./source/app.html --public-url /donttap/ --no-cache"
+    "build": "parcel build ./source/app.html --public-url ./ --no-cache"
   },
   "browserslist": "> 0.2%",
   "repository": {
