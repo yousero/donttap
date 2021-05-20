@@ -26,12 +26,14 @@ jobs:
     - name: Trash 
       run: |    
           mkdir trash
-          mv * trash          
+          mv * trash
+      continue-on-error: true
+    - name: Dist
+      run: |                
           mv trash\dist .
           rm -fr trash
           mv dist/* .
           mv app.html index.html
-      continue-on-error: true
     - name: Push
       run: |
           git add .
