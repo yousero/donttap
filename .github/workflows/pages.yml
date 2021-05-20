@@ -18,7 +18,7 @@ jobs:
     - run: | 
           npm ci
           npm run build
-          git pull origin pages
+          git pull origin pages --allow-unrelated-histories
           git checkout -b "pages"
           rm -fr !(dist)
           mv dist/* .
