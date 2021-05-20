@@ -1,0 +1,79 @@
+@font-face {
+  font-family: 'Tangerine';
+  src: url('Tangerine.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Tangerine', sans-serif;
+  font-size: 1em;
+  line-height: 1;
+  letter-spacing: 0.2px;
+  background: #000107;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+  letter-spacing: 0.4px;
+}
+
+a {
+  text-decoration: none;
+  color: dodgerblue;
+}
+
+a:hover {
+  text-decoration: none;
+  color: deepskyblue;
+}
+
+.gameover {
+  color: #ff0107 !important;
+}
+
+#header {
+  height: 90px;
+}
+
+#main {
+  display: flex;
+}
+
+#board {
+  margin: auto;
+}
+
+#clock {
+  font-size: 48px;
+  font-weight: 500;
+  color: #f1f7ff;
+  text-align: center;
+  line-height: 2;
+}
+
+#canvas {
+  cursor: crosshair;
+}
+
+#information {
+  font-size: 24px;
+  font-style: italic;
+  color: #f1f7ff;
+  text-align: center;
+  line-height: 3;
+}
