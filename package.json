@@ -1,0 +1,29 @@
+{
+  "name": "donttap",
+  "version": "0.1.2",
+  "description": "donttap browser game",
+  "scripts": {
+    "start": "parcel serve ./source/app.html",
+    "build": "parcel build ./source/app.html"
+  },
+  "browserslist": "> 0.2%",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yousero/donttap.git"
+  },
+  "keywords": [
+    "browser",
+    "game",
+    "donttap",
+    "clicker"
+  ],
+  "author": "yousero",
+  "license": "AGPL-3.0",
+  "bugs": {
+    "url": "https://github.com/yousero/donttap/issues"
+  },
+  "homepage": "https://github.com/yousero/donttap#readme",
+  "devDependencies": {
+    "parcel": "^2.0.0-beta.3.1"
+  }
+}
