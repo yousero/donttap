@@ -1,3 +1,0 @@
-function $8607729fe30814bbe4c1a99481280d48$export$9099ad97b570f7c(iter) {
-    if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter);
-}
