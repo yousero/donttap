@@ -74,3 +74,33 @@ a:hover {
   text-align: center;
   line-height: 3;
 }
+
+@media screen and (max-width: 445px) {
+  #header {
+    height: 60px;
+  }
+  #information {
+    font-size: 16px;
+  }
+  .canvas-wrapper {
+    padding: 10px;
+  }
+  #clock {
+    font-size: 40px;
+  }
+}
+
+@media screen and (min-width: 1024px) {
+  #header {
+    height: 120px;
+  }
+  #information {
+    font-size: 32px;
+  }
+  .canvas-wrapper {
+    padding: 20px;
+  }
+  #clock {
+    font-size: 56px;
+  }
+}

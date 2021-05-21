@@ -10,10 +10,10 @@ const bColor = '#ff0107'
 const fColor = '#f1f7ff'
 const aColor = '#000107'
 
-let cellSize = 72
+let cellSize = 100
 
-if (window.innerWidth > 445) {
-  cellSize = 100
+if (window.innerWidth < 446) {
+  cellSize = 72
 } else if (window.innerWidth > 1024) {
   cellSize = 128
 }
