@@ -14,7 +14,6 @@ const cellSize = 100
 const bSize = 1
 
 function renderSquare(x, y, cColor) {
-  console.log('renderSquare')
   ctx.fillStyle = cColor
   const rX = y * (cellSize + bSize) + bSize
   const rY = x * (cellSize + bSize) + bSize
@@ -22,7 +21,6 @@ function renderSquare(x, y, cColor) {
 }
 
 function render(_bColor = bColor, _fColor = fColor) {
-  console.log('render')
   ctx.fillStyle = _bColor
   ctx.fillRect(
     0,
@@ -43,7 +41,6 @@ function render(_bColor = bColor, _fColor = fColor) {
 }
 
 function renderBorders(sColor = bColor) {
-  console.log('renderBorders')
   ctx.strokeStyle = sColor
 
   for (let x = 0; x <= w; ++x) {
@@ -88,7 +85,6 @@ function textNumber(number) {
 }
 
 function gameover() {
-  console.log('gameover')
   state = 'GAMEOVER'
   clearTimeout(timer)
   clock = 0.0
@@ -128,7 +124,6 @@ function run() {
 const activeCells = 3
 
 function start() {
-  console.log('start')
   clockDiv.classList.remove('gameover')
 
   for (let y = 0; y < h; ++y) {
@@ -140,10 +135,11 @@ function start() {
   render()
 
   for (let i = 0; i < activeCells; ++i) {
-    let cell = gameMap[Math.floor(Math.random() * gameMap.length)]
-    let [x, y] = cell.split('.')
+    const index = Math.floor(Math.random() * gameMap.length)
+    const cell = gameMap[index]
+    const [x, y] = cell.split('.')
     renderSquare(x, y, aColor)
-    gameMap = gameMap.filter((x) => x != cell)
+    gameMap.splice(index, 1)
   }
 
   speed = 0
@@ -161,8 +157,6 @@ function start() {
 }
 
 function hit(event) {
-  console.log('hit')
-
   clicks += 1
 
   if (state == 'RUNNING') {
@@ -175,21 +169,19 @@ function hit(event) {
     } else {
       const cellX = Math.floor((x - (x % (cellSize + bSize))) / cellSize)
       const cellY = Math.floor((y - (y % (cellSize + bSize))) / cellSize)
-      console.log(cellX, cellY)
 
-      if (gameMap.includes(`${cellX}.${cellY}`)) {
-        console.log('miss')
+      if (gameMap.includes(`${cellX}.${cellY}`) || cellY >= h || cellX >= w) {
         misses += 1
         missStreak += 1
       } else {
         missStreak = 0
         renderSquare(cellX, cellY, fColor)
         {
-          let cell = gameMap[Math.floor(Math.random() * gameMap.length)]
-          let [x, y] = cell.split('.')
+          const index = Math.floor(Math.random() * gameMap.length)
+          const cell = gameMap[index]
+          const [x, y] = cell.split('.')
           renderSquare(x, y, aColor)
-          gameMap = gameMap.filter((x) => x != cell)
-          console.log(x, y)
+          gameMap.splice(index, 1)
         }
         gameMap.push(`${cellX}.${cellY}`)
       }
@@ -207,7 +199,4 @@ function hit(event) {
 
 render(bColor, aColor)
 
-// canvasDiv.addEventListener('touchstart', hit)
 canvasDiv.addEventListener('mousedown', hit)
-
-console.log('script ended')

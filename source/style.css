@@ -60,11 +60,11 @@ a:hover {
 
 .canvas-wrapper {
   padding: 20px;
+  user-select: none;
 }
 
 #canvas {
-  cursor: crosshair;
-  user-select: none;
+  cursor: pointer;
 }
 
 #information {
