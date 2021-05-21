@@ -10,8 +10,18 @@ const bColor = '#ff0107'
 const fColor = '#f1f7ff'
 const aColor = '#000107'
 
-const cellSize = 100
+let cellSize = 72
+
+if (window.innerWidth > 445) {
+  cellSize = 100
+} else if (window.innerWidth > 1024) {
+  cellSize = 128
+}
+
 const bSize = 1
+
+canvasDiv.height = h * (cellSize + bSize) + bSize
+canvasDiv.width = w * (cellSize + bSize) + bSize
 
 function renderSquare(x, y, cColor) {
   ctx.fillStyle = cColor
@@ -126,6 +136,7 @@ const activeCells = 3
 function start() {
   clockDiv.classList.remove('gameover')
 
+  gameMap = []
   for (let y = 0; y < h; ++y) {
     for (let x = 0; x < w; ++x) {
       gameMap.push(`${x}.${y}`)
@@ -145,6 +156,7 @@ function start() {
   speed = 0
   clicks = 0
   misses = 0
+  missStreak = 0
   accuracy = 1
 
   clock = 0.0
@@ -195,8 +207,18 @@ function hit(event) {
   } else {
     start()
   }
+
+  if (window.getSelection) {
+    window.getSelection().removeAllRanges()
+  } else if (document.selection) {
+    document.selection.empty()
+  }
 }
 
 render(bColor, aColor)
 
 canvasDiv.addEventListener('mousedown', hit)
+canvasDiv.addEventListener('contextmenu', (e) => {
+  e.preventDefault()
+  return false
+})
