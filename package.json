@@ -24,6 +24,7 @@
   },
   "homepage": "https://github.com/yousero/donttap#readme",
   "devDependencies": {
+    "@parcel/transformer-webmanifest": "^2.0.0-nightly.2186",
     "parcel": "^2.0.0-beta.3.1"
   }
 }
