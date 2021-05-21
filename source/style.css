@@ -58,9 +58,12 @@ a:hover {
   line-height: 2;
 }
 
+.canvas-wrapper {
+  padding: 20px;
+}
+
 #canvas {
   cursor: crosshair;
-  padding: 20px;
   user-select: none;
 }
 

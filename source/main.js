@@ -66,6 +66,7 @@ let accuracy = 1
 const breakPoint = 4
 let missStreak = 0
 
+let state = 'STOP'
 let clock = 0.0
 let startTime = new Date()
 let clickTime = startTime
@@ -88,6 +89,7 @@ function textNumber(number) {
 
 function gameover() {
   console.log('gameover')
+  state = 'GAMEOVER'
   clearTimeout(timer)
   clock = 0.0
   clockDiv.classList.add('gameover')
@@ -95,11 +97,15 @@ function gameover() {
 }
 
 function run() {
+  if (state != 'RUNNING') {
+    return
+  }
+
   speed = clock ? clicks / clock : 0
   accuracy = clicks ? clicks / (clicks + misses) : 1
 
   const tSpeed = textNumber(speed)
-  const tClicks = textNumber(clicks)
+  const tClicks = String(clicks)
   const tAccuracy = textNumber(accuracy)
 
   infoDiv.textContent = `${tSpeed} / ${tClicks} / ${tAccuracy}`
@@ -149,6 +155,8 @@ function start() {
   startTime = new Date()
   clickTime = startTime
 
+  state = 'RUNNING'
+
   run()
 }
 
@@ -157,7 +165,7 @@ function hit(event) {
 
   clicks += 1
 
-  if (clock) {
+  if (state == 'RUNNING') {
     const x = event.offsetX
     const y = event.offsetY
 
@@ -167,13 +175,23 @@ function hit(event) {
     } else {
       const cellX = Math.floor((x - (x % (cellSize + bSize))) / cellSize)
       const cellY = Math.floor((y - (y % (cellSize + bSize))) / cellSize)
+      console.log(cellX, cellY)
 
       if (gameMap.includes(`${cellX}.${cellY}`)) {
-        // renderSquare(cellX, cellY, aColor)
+        console.log('miss')
         misses += 1
         missStreak += 1
       } else {
+        missStreak = 0
         renderSquare(cellX, cellY, fColor)
+        {
+          let cell = gameMap[Math.floor(Math.random() * gameMap.length)]
+          let [x, y] = cell.split('.')
+          renderSquare(x, y, aColor)
+          gameMap = gameMap.filter((x) => x != cell)
+          console.log(x, y)
+        }
+        gameMap.push(`${cellX}.${cellY}`)
       }
     }
 
