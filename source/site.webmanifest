@@ -1,0 +1,15 @@
+{
+  "short_name": "DONTTAP",
+  "name": "yousero/DONTTAP",
+  "categories": ["games"],
+  "icons": [{
+    "src": "donttap_icon.png",
+    "type": "image/png",
+    "sizes": "192x192"
+  }],
+  "start_url": "/?utm_source=homescreen",
+  "background_color": "#000107",
+  "theme_color": "#ff0107",
+  "display": "fullscreen",
+  "orientation": "portrait"
+}
