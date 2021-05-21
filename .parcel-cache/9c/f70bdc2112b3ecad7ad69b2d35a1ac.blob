@@ -1,0 +1,3 @@
+function $fd7ad7649e929379c604e2ad8fcc0ab6$export$9099ad97b570f7c() {
+    throw new TypeError("Invalid attempt to destructure non-iterable instance");
+}
