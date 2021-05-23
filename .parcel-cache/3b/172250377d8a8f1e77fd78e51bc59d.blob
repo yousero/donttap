@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>yousero/DONTTAP</title>
+  <meta name="description" content="Fast action tapping browser game. Click on Black squares as fast as possible.">
+  <meta name="author" content="yousero">
+
+  <meta property="og:title" content="yousero/DONTTAP">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://yousero.github.io/donttap">
+  <meta property="og:image" content="3da0e85e873ff6346011a278cdbc2976">
+
+  <link rel="stylesheet" type="text/css" href="af5a7301c80c4540efc1874571a682b5">
+
+  <link rel="manifest" href="0436e4c450341d172a2221dc8051c8c2">
+  <link id="favicon" rel="shortcut icon" href="6800eb39376fad2c66799b646213953a">
+  <link rel="apple-touch-icon" href="91a559b42233ab507d29b35242ee0d0d">
+
+  <meta name="theme-color" content="#ff0107">
+</head>
+<body>
+  <div id="app">
+    <header id="header"></header>
+    <main id="main">
+      <div id="board">
+        <header id="clock">0.00</header>
+        <div class="canvas-wrapper"><canvas id="canvas" width="405px" height="405px"></canvas></div>
+        <footer id="information">speed / clicks / accuracy</footer>
+      </div>
+    </main>
+  </div>
+  <script src="87ae167fbae349bdeaf0cb0b0ad5220c"></script>
+</body>
+</html>
