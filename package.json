@@ -1,6 +1,6 @@
 {
   "name": "donttap",
-  "version": "0.2.9",
+  "version": "0.2.10",
   "description": "donttap browser game",
   "scripts": {
     "start": "parcel serve ./source/app.html",

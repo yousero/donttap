@@ -64,7 +64,7 @@ a:hover {
 }
 
 #canvas {
-  cursor: pointer;
+  cursor: url(circle2.cur) 6 6, auto;
 }
 
 #information {
