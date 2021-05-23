@@ -236,6 +236,12 @@ function hit(event) {
 
 render(bColor, aColor)
 
+let cX, cY
+
+canvasDiv.addEventListener('mousemove', function (e) {
+  cX = e.clientX
+  cY = e.clientY
+})
 canvasDiv.addEventListener('mousedown', hit)
 canvasDiv.addEventListener('contextmenu', (e) => {
   e.preventDefault()
@@ -246,7 +252,14 @@ document.body.addEventListener('keydown', (e) => {
   if (['Space', 'Escape'].includes(e.code)) {
     start()
   } else if (['KeyZ', 'KeyX', 'KeyC', 'KeyV'].includes(e.code)) {
-    console.log(e)
+    const event = new MouseEvent('mousedown', {
+      view: window,
+      bubbles: true,
+      cancelable: true,
+      clientX: cX,
+      clientY: cY
+    })
+    canvasDiv.dispatchEvent(event)
   }
 })
 window.addEventListener('resize', (e) => {
