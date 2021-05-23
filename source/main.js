@@ -182,7 +182,6 @@ function start() {
 
 const clickSound = new Audio('click.wav')
 clickSound.volume = 0.2
-clickSound.playbackRate = 2
 
 function hit(event) {
   clicks += 1
@@ -212,6 +211,8 @@ function hit(event) {
           gameMap.splice(index, 1)
         }
         gameMap.push(`${cellX}.${cellY}`)
+        clickSound.pause()
+        clickSound.currentTime = 0
         clickSound.play()
       }
     }
