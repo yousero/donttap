@@ -108,15 +108,16 @@ function run() {
     return
   }
 
+  const d = new Date()
+
   let i = 0
-  let d = new Date()
   for (; i < clickStamps.length; ++i) {
     if ((d - clickStamps[i]) / 1000 > 10) {
       break
     }
   }
 
-  clock = (new Date() - startTime) / 1000
+  clock = (d - startTime) / 1000
 
   speed = i / (clock < 10 ? clock || 1 : 10)
   accuracy = clicks ? clicks / (clicks + misses) : 1
@@ -133,7 +134,7 @@ function run() {
     clockDiv.textContent = '0.00'
   }
 
-  if ((new Date() - clickTime) / 1000 > 8) {
+  if ((d - clickTime) / 1000 > 4) {
     gameover()
   } else {
     setTimeout(run, 0)
@@ -179,6 +180,10 @@ function start() {
   run()
 }
 
+const clickSound = new Audio('click.wav')
+clickSound.volume = 0.2
+clickSound.playbackRate = 2
+
 function hit(event) {
   clicks += 1
 
@@ -207,6 +212,7 @@ function hit(event) {
           gameMap.splice(index, 1)
         }
         gameMap.push(`${cellX}.${cellY}`)
+        clickSound.play()
       }
     }
 
