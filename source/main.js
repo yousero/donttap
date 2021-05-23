@@ -3,12 +3,14 @@ const canvasDiv = document.getElementById('canvas')
 
 const ctx = canvasDiv.getContext('2d')
 
-const h = 4
-const w = 4
-
 const bColor = '#ff0107'
 const fColor = '#f1f7ff'
 const aColor = '#000107'
+
+const h = 4
+const w = 4
+
+const bSize = 1
 
 let cellSize = 100
 
@@ -17,8 +19,6 @@ if (window.innerWidth < 446) {
 } else if (window.innerWidth > 1024) {
   cellSize = 128
 }
-
-const bSize = 1
 
 canvasDiv.height = h * (cellSize + bSize) + bSize
 canvasDiv.width = w * (cellSize + bSize) + bSize
@@ -78,12 +78,13 @@ let clock = 0.0
 let startTime = new Date()
 let clickTime = startTime
 
+let clickStamps = []
+let gameMap = []
+
 const clockDiv = document.getElementById('clock')
 const infoDiv = document.getElementById('information')
 
 let timer = -1
-
-let gameMap = []
 
 function textNumber(number) {
   tNumber = String(Math.round(number * 100) / 100)
@@ -107,7 +108,17 @@ function run() {
     return
   }
 
-  speed = clock ? clicks / clock : 0
+  let i = 0
+  let d = new Date()
+  for (; i < clickStamps.length; ++i) {
+    if ((d - clickStamps[i]) / 1000 > 10) {
+      break
+    }
+  }
+
+  clock = (new Date() - startTime) / 1000
+
+  speed = i / (clock < 10 ? clock || 1 : 10)
   accuracy = clicks ? clicks / (clicks + misses) : 1
 
   const tSpeed = textNumber(speed)
@@ -115,8 +126,6 @@ function run() {
   const tAccuracy = textNumber(accuracy)
 
   infoDiv.textContent = `${tSpeed} / ${tClicks} / ${tAccuracy}`
-
-  clock = (new Date() - startTime) / 1000
 
   if (clock > 0) {
     clockDiv.textContent = textNumber(clock)
@@ -163,6 +172,8 @@ function start() {
   startTime = new Date()
   clickTime = startTime
 
+  clickStamps = []
+
   state = 'RUNNING'
 
   run()
@@ -200,6 +211,7 @@ function hit(event) {
     }
 
     clickTime = new Date()
+    clickStamps.unshift(clickTime)
 
     if (missStreak >= breakPoint) {
       gameover()
@@ -221,4 +233,28 @@ canvasDiv.addEventListener('mousedown', hit)
 canvasDiv.addEventListener('contextmenu', (e) => {
   e.preventDefault()
   return false
+})
+
+document.body.addEventListener('keydown', (e) => {
+  if (['Space', 'Escape'].includes(e.code)) {
+    start()
+  } else if (['KeyZ', 'KeyX', 'KeyC', 'KeyV'].includes(e.code)) {
+    console.log(e)
+  }
+})
+window.addEventListener('resize', (e) => {
+  if (state != 'RUNNING') {
+    cellSize = 100
+
+    if (window.innerWidth < 446) {
+      cellSize = 72
+    } else if (window.innerWidth > 1024) {
+      cellSize = 128
+    }
+
+    canvasDiv.height = h * (cellSize + bSize) + bSize
+    canvasDiv.width = w * (cellSize + bSize) + bSize
+
+    render(bColor, aColor)
+  }
 })
