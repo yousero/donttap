@@ -23,7 +23,7 @@ jobs:
           git checkout -b pages origin/pages
       - name: Trash
         run: |
-          find . -name "*" -not -path "./dist" -print0 | cut -c3- | xargs -0 -I {} rm -fr {}
+          find . -depth 1 -name "*" -not -path "./dist" -print0 | cut -c3- | xargs -0 -I {} rm -fr {}
         continue-on-error: true
       - name: Dist
         run: |
