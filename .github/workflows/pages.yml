@@ -17,7 +17,7 @@ jobs:
         run: |
           npm ci
           npm run build
-          cp source\click.wav dist          
+          cp source/click.wav dist/          
           git config user.name github-actions
           git config user.email github-actions@github.com
           git fetch origin
