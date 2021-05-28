@@ -75,16 +75,20 @@ let missStreak = 0
 
 let state = 'STOP'
 let clock = 0.0
+let secToLife = 2.0
+
 let startTime = new Date()
 let clickTime = startTime
+let hitTime = startTime
 
 let clickStamps = []
 let gameMap = []
+let squares = []
 
 const clockDiv = document.getElementById('clock')
 const infoDiv = document.getElementById('information')
 
-let timer = -1
+let intervalId = -1
 
 function textNumber(number) {
   tNumber = String(Math.round(number * 100) / 100)
@@ -97,10 +101,29 @@ function textNumber(number) {
 
 function gameover() {
   state = 'GAMEOVER'
-  clearTimeout(timer)
+  clearInterval(intervalId)
   clock = 0.0
   clockDiv.classList.add('gameover')
   render(bColor, aColor)
+}
+
+function colorProgress(c1, c2, x) {
+  let r1 = parseInt(c1.slice(1, 3), 16)
+  let g1 = parseInt(c1.slice(3, 5), 16)
+  let b1 = parseInt(c1.slice(5, 7), 16)
+  let r2 = parseInt(c2.slice(1, 3), 16)
+  let g2 = parseInt(c2.slice(3, 5), 16)
+  let b2 = parseInt(c2.slice(5, 7), 16)
+
+  let r3 = parseInt(r1 + (r2 - r1) * x).toString(16)
+  let g3 = parseInt(g1 + (g2 - g1) * x).toString(16)
+  let b3 = parseInt(b1 + (b2 - b1) * x).toString(16)
+
+  r3 = r3.length == 1 ? '0' + r3 : r3
+  g3 = g3.length == 1 ? '0' + g3 : g3
+  b3 = b3.length == 1 ? '0' + b3 : b3
+
+  return `#${r3}${g3}${b3}`
 }
 
 function run() {
@@ -134,11 +157,28 @@ function run() {
     clockDiv.textContent = '0.00'
   }
 
-  if ((d - clickTime) / 1000 > 4) {
+  if ((d - hitTime) / 1000 > secToLife) {
     gameover()
+    return false
   } else {
-    setTimeout(run, 0)
+    for (let cell of squares) {
+      let [x, y] = cell.split('.')
+      renderSquare(
+        x,
+        y,
+        colorProgress(aColor, fColor, (d - hitTime) / 1000 / secToLife)
+      )
+    }
   }
+}
+
+function randomCell() {
+  const index = Math.floor(Math.random() * gameMap.length)
+  const cell = gameMap[index]
+  squares.push(cell)
+  const [x, y] = cell.split('.')
+  renderSquare(x, y, aColor)
+  gameMap.splice(index, 1)
 }
 
 const activeCells = 3
@@ -155,29 +195,30 @@ function start() {
 
   render()
 
+  squares = []
   for (let i = 0; i < activeCells; ++i) {
-    const index = Math.floor(Math.random() * gameMap.length)
-    const cell = gameMap[index]
-    const [x, y] = cell.split('.')
-    renderSquare(x, y, aColor)
-    gameMap.splice(index, 1)
+    randomCell()
   }
 
   speed = 0
   clicks = 0
+
   misses = 0
   missStreak = 0
   accuracy = 1
 
   clock = 0.0
+  secToLife = 2.0
+
   startTime = new Date()
   clickTime = startTime
+  hitTime = startTime
 
   clickStamps = []
 
   state = 'RUNNING'
 
-  run()
+  intervalId = setInterval(run, 0)
 }
 
 const clickSound = new Audio('click.wav')
@@ -187,8 +228,14 @@ function hit(event) {
   clicks += 1
 
   if (state == 'RUNNING') {
-    const x = event.offsetX
-    const y = event.offsetY
+    let x, y
+    if (event instanceof TouchEvent) {
+      x = event.touches[0].clientX - canvasDiv.offsetLeft
+      y = event.touches[0].clientY - canvasDiv.offsetTop
+    } else {
+      x = event.offsetX
+      y = event.offsetY
+    }
 
     if (x == 0 || y == 0 || x == this.width || y == this.height) {
       misses += 1
@@ -201,16 +248,15 @@ function hit(event) {
         misses += 1
         missStreak += 1
       } else {
+        hitTime = new Date()
         missStreak = 0
-        renderSquare(cellX, cellY, fColor)
-        {
-          const index = Math.floor(Math.random() * gameMap.length)
-          const cell = gameMap[index]
-          const [x, y] = cell.split('.')
-          renderSquare(x, y, aColor)
-          gameMap.splice(index, 1)
-        }
+
+        squares.splice(squares.indexOf(`${cellX}.${cellY}`), 1)
         gameMap.push(`${cellX}.${cellY}`)
+
+        renderSquare(cellX, cellY, fColor)
+        randomCell()
+
         clickSound.pause()
         clickSound.currentTime = 0
         clickSound.play()
@@ -222,6 +268,10 @@ function hit(event) {
 
     if (missStreak >= breakPoint) {
       gameover()
+    }
+
+    if (clicks % 10 == 0) {
+      secToLife *= 0.9966
     }
   } else {
     start()
@@ -241,6 +291,11 @@ let cX, cY
 canvasDiv.addEventListener('mousemove', function (e) {
   cX = e.clientX
   cY = e.clientY
+})
+canvasDiv.addEventListener('touchstart', (e) => {
+  hit(e)
+  e.preventDefault()
+  return false
 })
 canvasDiv.addEventListener('mousedown', hit)
 canvasDiv.addEventListener('contextmenu', (e) => {

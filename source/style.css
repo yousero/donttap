@@ -9,7 +9,7 @@ body {
 }
 
 body {
-  font-family: monospace;
+  font-family: 'Roboto Mono', monospace;
   font-size: 1em;
   line-height: 1;
   letter-spacing: 1.2px;
@@ -64,7 +64,7 @@ a:hover {
 }
 
 #canvas {
-  cursor: url(circle2.cur) 6 6, auto;
+  cursor: url(circle3.cur) 8 8, auto;
 }
 
 #information {
@@ -91,9 +91,6 @@ a:hover {
 }
 
 @media screen and (min-width: 1024px) {
-  #header {
-    height: 120px;
-  }
   #information {
     font-size: 32px;
   }
