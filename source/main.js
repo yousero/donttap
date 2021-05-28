@@ -157,17 +157,15 @@ function run() {
     clockDiv.textContent = '0.00'
   }
 
-  if ((d - hitTime) / 1000 > secToLife) {
+  const delta = (d - hitTime) / 1000
+
+  if (delta >= secToLife) {
     gameover()
     return false
   } else {
     for (let cell of squares) {
       let [x, y] = cell.split('.')
-      renderSquare(
-        x,
-        y,
-        colorProgress(aColor, fColor, (d - hitTime) / 1000 / secToLife)
-      )
+      renderSquare(x, y, colorProgress(aColor, fColor, delta / secToLife))
     }
   }
 }
@@ -333,3 +331,7 @@ window.addEventListener('resize', (e) => {
     render(bColor, aColor)
   }
 })
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js')
+}
