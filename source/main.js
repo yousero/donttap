@@ -251,11 +251,11 @@ function hit(event) {
         hitTime = new Date()
         missStreak = 0
 
-        squares.splice(squares.indexOf(`${cellX}.${cellY}`), 1)
-        gameMap.push(`${cellX}.${cellY}`)
-
         renderSquare(cellX, cellY, fColor)
         randomCell()
+
+        gameMap.push(`${cellX}.${cellY}`)
+        squares.splice(squares.indexOf(`${cellX}.${cellY}`), 1)
 
         clickSound.pause()
         clickSound.currentTime = 0
