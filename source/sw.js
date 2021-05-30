@@ -29,7 +29,7 @@ self.addEventListener('fetch', function (event) {
         if (response) {
           return response
         }
-        return fetch(event.request.clone())
+        return fetch(event.request.clone(), { ignoreVary: true })
       })
       .then(function (response) {
         if (response.status < 400) {
