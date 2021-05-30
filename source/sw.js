@@ -24,12 +24,12 @@ self.addEventListener('fetch', function (event) {
   event.respondWith(
     caches
       .open(CURRENT_CACHES['read-through'])
-      .match(event.request)
+      .match(event.request, { ignoreVary: true })
       .then(function (response) {
         if (response) {
           return response
         }
-        return fetch(event.request.clone(), { ignoreVary: true })
+        return fetch(event.request.clone())
       })
       .then(function (response) {
         if (response.status < 400) {
