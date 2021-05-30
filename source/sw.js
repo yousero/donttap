@@ -1,4 +1,4 @@
-const CACHE_VERSION = 1
+const CACHE_VERSION = 2
 const CURRENT_CACHES = {
   'read-through': 'read-through-cache-v' + CACHE_VERSION
 }
@@ -22,18 +22,20 @@ self.addEventListener('activate', function (event) {
 })
 self.addEventListener('fetch', function (event) {
   event.respondWith(
-    caches.open(CURRENT_CACHES['read-through']).then(function (cache) {
-      return cache.match(event.request).then(function (response) {
+    caches
+      .open(CURRENT_CACHES['read-through'])
+      .match(event.request)
+      .then(function (response) {
         if (response) {
           return response
         }
-        return fetch(event.request.clone()).then(function (response) {
-          if (response.status < 400) {
-            cache.put(event.request, response.clone())
-          }
-          return response
-        })
+        return fetch(event.request.clone())
       })
-    })
+      .then(function (response) {
+        if (response.status < 400) {
+          cache.put(event.request, response.clone())
+        }
+        return response
+      })
   )
 })
