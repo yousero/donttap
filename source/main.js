@@ -6,6 +6,7 @@ const ctx = canvasDiv.getContext('2d')
 const bColor = '#ff0107'
 const fColor = '#f1f7ff'
 const aColor = '#000107'
+const cColor = '#07ff07'
 
 const h = 4
 const w = 4
@@ -168,7 +169,7 @@ function run() {
   } else {
     for (let cell of squares) {
       let [x, y] = cell.split('.')
-      renderSquare(x, y, colorProgress(aColor, fColor, delta / secToLife))
+      renderSquare(x, y, colorProgress(aColor, cColor, delta / secToLife))
     }
   }
 }
