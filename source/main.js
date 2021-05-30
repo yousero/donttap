@@ -78,8 +78,10 @@ let clock = 0.0
 let secToLife = 2.0
 
 let startTime = new Date()
-let clickTime = startTime
-let hitTime = startTime
+let clickTime = new Date()
+let hitTime = new Date()
+let endTime = new Date()
+endTime.setSeconds(-120)
 
 let clickStamps = []
 let gameMap = []
@@ -105,6 +107,7 @@ function gameover() {
   clock = 0.0
   clockDiv.classList.add('gameover')
   render(bColor, aColor)
+  endTime = new Date()
 }
 
 function colorProgress(c1, c2, x) {
@@ -182,6 +185,10 @@ function randomCell() {
 const activeCells = 3
 
 function start() {
+  if ((new Date() - endTime) / 1000 < 1.5) {
+    return
+  }
+
   clockDiv.classList.remove('gameover')
 
   gameMap = []
