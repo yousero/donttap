@@ -219,9 +219,6 @@ function start() {
   intervalId = setInterval(run, 0)
 }
 
-const clickSound = new Audio('click.wav')
-clickSound.volume = 0.2
-
 function hit(event) {
   clicks += 1
 
@@ -254,10 +251,6 @@ function hit(event) {
 
         gameMap.push(`${cellX}.${cellY}`)
         squares.splice(squares.indexOf(`${cellX}.${cellY}`), 1)
-
-        clickSound.pause()
-        clickSound.currentTime = 0
-        clickSound.play()
       }
     }
 
