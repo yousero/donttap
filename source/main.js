@@ -76,7 +76,7 @@ let missStreak = 0
 
 let state = 'STOP'
 let clock = 0.0
-let msToLife = 500
+let msToLife = 350
 
 let clickTime = new Date()
 let hitTime = new Date()
@@ -87,7 +87,6 @@ endTime.setSeconds(-120)
 
 let clickStamps = []
 let gameMap = []
-let squares = []
 
 const clockDiv = document.getElementById('clock')
 const infoDiv = document.getElementById('information')
@@ -105,8 +104,8 @@ function textNumber(number) {
 
 function gameover() {
   state = 'GAMEOVER'
-  clearInterval(intervalId)
   clock = 0.0
+  clockDiv.textContent = '0.00'
   clockDiv.classList.add('gameover')
   render(bColor, aColor)
 }
@@ -137,27 +136,10 @@ function run() {
 
   const d = new Date()
 
-  let i = 0
-  for (; i < clickStamps.length; ++i) {
-    if ((d - clickStamps[i]) / 1000 > 10) {
-      break
-    }
-  }
-
   msClock = endTime - d
-  clock = (d - startTime) / 1000
-
-  speed = i / (clock < 10 ? clock || 1 : 10)
-  accuracy = clicks ? clicks / (clicks + misses) : 1
-
-  const tSpeed = textNumber(speed)
-  const tClicks = String(clicks)
-  const tAccuracy = textNumber(accuracy)
-
-  infoDiv.textContent = `${tSpeed} / ${tClicks} / ${tAccuracy}`
 
   if (msClock <= 0) {
-    gameover()
+    return gameover()
   } else {
     if (msClock < 500) {
       for (let cell of gameMap) {
@@ -168,17 +150,36 @@ function run() {
     }
   }
 
+  let i = 0
+  for (; i < clickStamps.length; ++i) {
+    if ((d - clickStamps[i]) / 1000 > 10) {
+      break
+    }
+  }
+
+  clock = (d - startTime) / 1000
+
   if (clock > 0) {
     clockDiv.textContent = textNumber(msClock / 1000)
   } else {
     clockDiv.textContent = '0.00'
   }
+
+  speed = i / (clock < 10 ? clock || 1 : 10)
+  accuracy = clicks ? clicks / (clicks + misses) : 1
+
+  const tSpeed = textNumber(speed)
+  const tClicks = String(clicks)
+  const tAccuracy = textNumber(accuracy)
+
+  infoDiv.textContent = `${tSpeed} / ${tClicks} / ${tAccuracy}`
+
+  requestAnimationFrame(run)
 }
 
 function randomCell() {
   const index = Math.floor(Math.random() * gameMap.length)
   const cell = gameMap[index]
-  squares.push(cell)
   const [x, y] = cell.split('.')
   renderSquare(x, y, aColor)
   gameMap.splice(index, 1)
@@ -202,7 +203,6 @@ function start() {
 
   render()
 
-  squares = []
   for (let i = 0; i < activeCells; ++i) {
     randomCell()
   }
@@ -215,7 +215,7 @@ function start() {
   accuracy = 1
 
   clock = 0.0
-  msToLife = 500
+  msToLife = 350
 
   startTime = new Date()
   endTime = new Date()
@@ -228,7 +228,7 @@ function start() {
 
   state = 'RUNNING'
 
-  intervalId = setInterval(run, 0)
+  requestAnimationFrame(run)
 }
 
 function hit(event) {
@@ -266,7 +266,6 @@ function hit(event) {
         randomCell()
 
         gameMap.push(`${cellX}.${cellY}`)
-        squares.splice(squares.indexOf(`${cellX}.${cellY}`), 1)
       }
     }
 
@@ -277,8 +276,12 @@ function hit(event) {
       gameover()
     }
 
-    if (clicks % 10 == 0) {
-      msToLife *= 0.9966
+    if (msToLife != 175 && clicks % 12 == 0) {
+      if (msToLife < 175) {
+        msToLife = 175
+      } else {
+        msToLife *= 0.9966
+      }
     }
   } else {
     start()
