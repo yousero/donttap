@@ -76,11 +76,12 @@ let missStreak = 0
 
 let state = 'STOP'
 let clock = 0.0
-let secToLife = 2.0
+let msToLife = 500
 
-let startTime = new Date()
 let clickTime = new Date()
 let hitTime = new Date()
+
+let startTime = new Date()
 let endTime = new Date()
 endTime.setSeconds(-120)
 
@@ -108,7 +109,6 @@ function gameover() {
   clock = 0.0
   clockDiv.classList.add('gameover')
   render(bColor, aColor)
-  endTime = new Date()
 }
 
 function colorProgress(c1, c2, x) {
@@ -144,6 +144,7 @@ function run() {
     }
   }
 
+  msClock = endTime - d
   clock = (d - startTime) / 1000
 
   speed = i / (clock < 10 ? clock || 1 : 10)
@@ -155,22 +156,22 @@ function run() {
 
   infoDiv.textContent = `${tSpeed} / ${tClicks} / ${tAccuracy}`
 
-  if (clock > 0) {
-    clockDiv.textContent = textNumber(clock)
+  if (msClock <= 0) {
+    gameover()
   } else {
-    clockDiv.textContent = '0.00'
+    if (msClock < 500) {
+      for (let cell of gameMap) {
+        let [x, y] = cell.split('.')
+        const color = colorProgress(fColor, bColor, (500 - msClock) / 500)
+        renderSquare(x, y, color)
+      }
+    }
   }
 
-  const delta = (d - hitTime) / 1000
-
-  if (delta >= secToLife) {
-    gameover()
-    return false
+  if (clock > 0) {
+    clockDiv.textContent = textNumber(msClock / 1000)
   } else {
-    for (let cell of squares) {
-      let [x, y] = cell.split('.')
-      renderSquare(x, y, colorProgress(aColor, cColor, delta / secToLife))
-    }
+    clockDiv.textContent = '0.00'
   }
 }
 
@@ -186,7 +187,7 @@ function randomCell() {
 const activeCells = 3
 
 function start() {
-  if ((new Date() - endTime) / 1000 < 1.5) {
+  if (new Date() - endTime < 1500) {
     return
   }
 
@@ -214,9 +215,12 @@ function start() {
   accuracy = 1
 
   clock = 0.0
-  secToLife = 2.0
+  msToLife = 500
 
   startTime = new Date()
+  endTime = new Date()
+  endTime.setSeconds(endTime.getSeconds() + 16)
+
   clickTime = startTime
   hitTime = startTime
 
@@ -241,9 +245,13 @@ function hit(event) {
     }
 
     if (x == 0 || y == 0 || x == this.width || y == this.height) {
+      endTime.setMilliseconds(endTime.getMilliseconds() - msToLife)
+
       misses += 1
       missStreak += 1
     } else {
+      endTime.setMilliseconds(endTime.getMilliseconds() + msToLife)
+
       const cellX = Math.floor((x - (x % (cellSize + bSize))) / cellSize)
       const cellY = Math.floor((y - (y % (cellSize + bSize))) / cellSize)
 
@@ -270,7 +278,7 @@ function hit(event) {
     }
 
     if (clicks % 10 == 0) {
-      secToLife *= 0.9966
+      msToLife *= 0.9966
     }
   } else {
     start()
