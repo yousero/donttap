@@ -283,6 +283,8 @@ function hit(event) {
       msToLife -= 0.125
     } else if (msToLife > 166) {
       msToLife -= 1 / 150
+    } else if (msToLife > 142) {
+      msToLife -= 0.0016
     }
   } else {
     start()
