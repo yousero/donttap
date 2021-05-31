@@ -76,6 +76,7 @@ let missStreak = 0
 
 let state = 'STOP'
 let clock = 0.0
+
 let msToLife = 350
 
 let clickTime = new Date()
@@ -214,7 +215,9 @@ function start() {
   missStreak = 0
   accuracy = 1
 
+  state = 'RUNNING'
   clock = 0.0
+
   msToLife = 350
 
   startTime = new Date()
@@ -225,8 +228,6 @@ function start() {
   hitTime = startTime
 
   clickStamps = []
-
-  state = 'RUNNING'
 
   requestAnimationFrame(run)
 }
@@ -276,12 +277,12 @@ function hit(event) {
       gameover()
     }
 
-    if (msToLife != 175 && clicks % 12 == 0) {
-      if (msToLife < 175) {
-        msToLife = 175
-      } else {
-        msToLife *= 0.9966
-      }
+    if (msToLife > 250) {
+      msToLife -= 0.8
+    } else if (msToLife > 200) {
+      msToLife -= 0.125
+    } else if (msToLife > 166) {
+      msToLife -= 1 / 150000
     }
   } else {
     start()
