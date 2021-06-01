@@ -104,6 +104,7 @@ function textNumber(number) {
 }
 
 function gameover() {
+  endTime = new Date()
   state = 'GAMEOVER'
   clock = 0.0
   clockDiv.textContent = '0.00'
@@ -188,8 +189,8 @@ function randomCell() {
 
 const activeCells = 3
 
-function start() {
-  if (new Date() - endTime < 1500) {
+function start(reset = false) {
+  if (!reset && new Date() - endTime < 1500) {
     return
   }
 
@@ -318,7 +319,7 @@ canvasDiv.addEventListener('contextmenu', (e) => {
 
 document.body.addEventListener('keydown', (e) => {
   if (['Space', 'Escape'].includes(e.code)) {
-    start()
+    start(true)
   } else if (['KeyZ', 'KeyX', 'KeyC', 'KeyV'].includes(e.code)) {
     const event = new MouseEvent('mousedown', {
       view: window,
