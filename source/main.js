@@ -92,17 +92,6 @@ let gameMap = []
 const clockDiv = document.getElementById('clock')
 const infoDiv = document.getElementById('information')
 
-let intervalId = -1
-
-function textNumber(number) {
-  tNumber = String(Math.round(number * 100) / 100)
-
-  if (tNumber.slice(-2, -1) == '.') tNumber += '0'
-  if (tNumber.slice(-3, -2) != '.') tNumber += '.00'
-
-  return tNumber
-}
-
 function gameover() {
   endTime = new Date()
   state = 'GAMEOVER'
@@ -112,23 +101,32 @@ function gameover() {
   render(bColor, aColor)
 }
 
-function colorProgress(c1, c2, x) {
-  let r1 = parseInt(c1.slice(1, 3), 16)
-  let g1 = parseInt(c1.slice(3, 5), 16)
-  let b1 = parseInt(c1.slice(5, 7), 16)
-  let r2 = parseInt(c2.slice(1, 3), 16)
-  let g2 = parseInt(c2.slice(3, 5), 16)
-  let b2 = parseInt(c2.slice(5, 7), 16)
+function colorProgress(c1, c2, weight) {
+  const r1 = parseInt(c1.slice(1, 3), 16)
+  const g1 = parseInt(c1.slice(3, 5), 16)
+  const b1 = parseInt(c1.slice(5, 7), 16)
+  const r2 = parseInt(c2.slice(1, 3), 16)
+  const g2 = parseInt(c2.slice(3, 5), 16)
+  const b2 = parseInt(c2.slice(5, 7), 16)
 
-  let r3 = parseInt(r1 + (r2 - r1) * x).toString(16)
-  let g3 = parseInt(g1 + (g2 - g1) * x).toString(16)
-  let b3 = parseInt(b1 + (b2 - b1) * x).toString(16)
+  let r3 = parseInt(r1 + (r2 - r1) * weight).toString(16)
+  let g3 = parseInt(g1 + (g2 - g1) * weight).toString(16)
+  let b3 = parseInt(b1 + (b2 - b1) * weight).toString(16)
 
   r3 = r3.length == 1 ? '0' + r3 : r3
   g3 = g3.length == 1 ? '0' + g3 : g3
   b3 = b3.length == 1 ? '0' + b3 : b3
 
   return `#${r3}${g3}${b3}`
+}
+
+function textNumber(number) {
+  tNumber = String(Math.round(number * 100) / 100)
+
+  if (tNumber.slice(-2, -1) == '.') tNumber += '0'
+  if (tNumber.slice(-3, -2) != '.') tNumber += '.00'
+
+  return tNumber
 }
 
 function run() {
@@ -302,7 +300,7 @@ render(bColor, aColor)
 
 let cX, cY
 
-canvasDiv.addEventListener('mousemove', function (e) {
+canvasDiv.addEventListener('mousemove', (e) => {
   cX = e.clientX
   cY = e.clientY
 })
@@ -312,7 +310,7 @@ canvasDiv.addEventListener('touchstart', (e) => {
   return false
 })
 canvasDiv.addEventListener('mousedown', hit)
-canvasDiv.addEventListener('contextmenu', (e) => {
+canvasDiv.parentElement.addEventListener('contextmenu', (e) => {
   e.preventDefault()
   return false
 })
@@ -331,7 +329,7 @@ document.body.addEventListener('keydown', (e) => {
     canvasDiv.dispatchEvent(event)
   }
 })
-window.addEventListener('resize', (e) => {
+window.addEventListener('resize', (_) => {
   if (state != 'RUNNING') {
     cellSize = 100
 
