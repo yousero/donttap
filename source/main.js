@@ -104,31 +104,34 @@ function textNumber(number) {
 }
 
 function gameover() {
-  endTime = new Date()
-  state = 'GAMEOVER'
-  clock = 0.0
-  healthbarDiv.style.width = '0%'
-  render(borderColor, squareColor)
+  if (state == 'RUNNING') {
+    endTime = new Date()
+    state = 'GAMEOVER'
+    clock = 0.0
 
-  const deltaTime = (endTime - startTime) / 1000
+    healthbarDiv.style.width = '0%'
+    render(borderColor, squareColor)
 
-  speed = clicks / deltaTime
-  accuracy = clicks ? clicks / (clicks + misses) : 1
+    const deltaTime = (endTime - startTime) / 1000
 
-  const minutes = Math.floor(deltaTime / 60)
+    speed = clicks / deltaTime
+    accuracy = clicks ? clicks / (clicks + misses) : 1
 
-  if (minutes > 0) {
-    const seconds = Math.floor(deltaTime) % 60
-    addInfo('time', `${minutes}:${seconds}`)
-  } else {
-    addInfo('time', textNumber(deltaTime))
+    const minutes = Math.floor(deltaTime / 60)
+
+    if (minutes > 0) {
+      const seconds = Math.floor(deltaTime) % 60
+      addInfo('time', `${minutes}:${seconds}`)
+    } else {
+      addInfo('time', textNumber(deltaTime))
+    }
+
+    addInfo('clicks', String(clicks))
+    addInfo('speed', textNumber(speed))
+    addInfo('accuracy', textNumber(accuracy * 100) + '%')
+    
+    infoDiv.classList.remove('hidden')
   }
-
-  addInfo('clicks', String(clicks))
-  addInfo('speed', textNumber(speed))
-  addInfo('accuracy', textNumber(accuracy * 100) + '%')
-  
-  infoDiv.classList.remove('hidden')
 }
 
 function run() {
