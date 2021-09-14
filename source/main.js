@@ -120,7 +120,10 @@ function gameover() {
     const minutes = Math.floor(deltaTime / 60)
 
     if (minutes > 0) {
-      const seconds = Math.floor(deltaTime) % 60
+      let seconds = Math.floor(deltaTime) % 60
+      if (seconds < 10) {
+        seconds = '0' + seconds
+      }
       addInfo('time', `${minutes}:${seconds}`)
     } else {
       addInfo('time', textNumber(deltaTime))
