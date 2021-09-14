@@ -1,17 +1,21 @@
 const appDiv = document.getElementById('app')
 const canvasDiv = document.getElementById('canvas')
+const healthbarDiv = document.getElementById('healthbar')
 
 const ctx = canvasDiv.getContext('2d')
 
-const bColor = '#ff0107'
-const fColor = '#f1f7ff'
-const aColor = '#000107'
-const cColor = '#07ff07'
+const borderColor = '#ff0107'
+const fillColor = '#f1f7ff'
+const activeColor = '#000107'
+const squareColor = '#00BFFF'
+
+healthbarDiv.style.backgroundColor = fillColor
+healthbarDiv.style.width = '0%'
 
 const h = 4
 const w = 4
 
-const bSize = 1
+const bSize = 0
 
 let cellSize = 100
 
@@ -31,8 +35,8 @@ function renderSquare(x, y, cColor) {
   ctx.fillRect(rY, rX, cellSize, cellSize)
 }
 
-function render(_bColor = bColor, _fColor = fColor) {
-  ctx.fillStyle = _bColor
+function render(_borderColor = borderColor, _fillColor = fillColor) {
+  ctx.fillStyle = _borderColor
   ctx.fillRect(
     0,
     0,
@@ -40,7 +44,7 @@ function render(_bColor = bColor, _fColor = fColor) {
     (cellSize + bSize) * w + bSize
   )
 
-  ctx.fillStyle = _fColor
+  ctx.fillStyle = _fillColor
 
   for (let y = 0; y < h; ++y) {
     for (let x = 0; x < w; ++x) {
@@ -48,21 +52,6 @@ function render(_bColor = bColor, _fColor = fColor) {
       const rY = x * (cellSize + bSize) + bSize
       ctx.fillRect(rY, rX, cellSize, cellSize)
     }
-  }
-}
-
-function renderBorders(sColor = bColor) {
-  ctx.strokeStyle = sColor
-
-  for (let x = 0; x <= w; ++x) {
-    ctx.moveTo(x * (cellSize + bSize) + 0.5, 0)
-    ctx.lineTo(x * (cellSize + bSize) + 0.5, h * (cellSize + bSize) + bSize)
-    ctx.stroke()
-  }
-  for (let y = 0; y <= h; ++y) {
-    ctx.moveTo(0, y * (cellSize + bSize) + 0.5)
-    ctx.lineTo(w * (cellSize + bSize) + bSize, y * (cellSize + bSize) + 0.5)
-    ctx.stroke()
   }
 }
 
@@ -77,7 +66,7 @@ let missStreak = 0
 let state = 'STOP'
 let clock = 0.0
 
-let msToLife = 350
+let msToLife = 250
 
 let clickTime = new Date()
 let hitTime = new Date()
@@ -89,35 +78,20 @@ endTime.setSeconds(-120)
 let clickStamps = []
 let gameMap = []
 
-const clockDiv = document.getElementById('clock')
 const infoDiv = document.getElementById('information')
 
-function gameover() {
-  endTime = new Date()
-  state = 'GAMEOVER'
-  clock = 0.0
-  clockDiv.textContent = '0.00'
-  clockDiv.classList.add('gameover')
-  render(bColor, aColor)
-}
-
-function colorProgress(c1, c2, weight) {
-  const r1 = parseInt(c1.slice(1, 3), 16)
-  const g1 = parseInt(c1.slice(3, 5), 16)
-  const b1 = parseInt(c1.slice(5, 7), 16)
-  const r2 = parseInt(c2.slice(1, 3), 16)
-  const g2 = parseInt(c2.slice(3, 5), 16)
-  const b2 = parseInt(c2.slice(5, 7), 16)
-
-  let r3 = parseInt(r1 + (r2 - r1) * weight).toString(16)
-  let g3 = parseInt(g1 + (g2 - g1) * weight).toString(16)
-  let b3 = parseInt(b1 + (b2 - b1) * weight).toString(16)
-
-  r3 = r3.length == 1 ? '0' + r3 : r3
-  g3 = g3.length == 1 ? '0' + g3 : g3
-  b3 = b3.length == 1 ? '0' + b3 : b3
-
-  return `#${r3}${g3}${b3}`
+function addInfo(tlabel, tvalue) {
+  const el = document.createElement('div')
+  el.classList.add('stats')
+  const label = document.createElement('div')
+  label.classList.add('stats-label')
+  label.textContent = tlabel
+  el.appendChild(label)
+  const value = document.createElement('div')
+  value.classList.add('stats-value')
+  value.textContent = tvalue
+  el.appendChild(value)
+  infoDiv.appendChild(el)
 }
 
 function textNumber(number) {
@@ -127,6 +101,34 @@ function textNumber(number) {
   if (tNumber.slice(-3, -2) != '.') tNumber += '.00'
 
   return tNumber
+}
+
+function gameover() {
+  endTime = new Date()
+  state = 'GAMEOVER'
+  clock = 0.0
+  healthbarDiv.style.width = '0%'
+  render(borderColor, squareColor)
+
+  const deltaTime = (endTime - startTime) / 1000
+
+  speed = clicks / deltaTime
+  accuracy = clicks ? clicks / (clicks + misses) : 1
+
+  const minutes = Math.round(deltaTime / 60)
+
+  if (minutes > 0) {
+    const seconds = Math.round(deltaTime % 60)
+    addInfo('time', `${minutes}:${seconds}`)
+  } else {
+    addInfo('time', textNumber(deltaTime))
+  }
+
+  addInfo('clicks', String(clicks))
+  addInfo('speed', textNumber(speed))
+  addInfo('accuracy', textNumber(accuracy * 100) + '%')
+  
+  infoDiv.classList.remove('hidden')
 }
 
 function run() {
@@ -140,39 +142,15 @@ function run() {
 
   if (msClock <= 0) {
     return gameover()
-  } else {
-    if (msClock < 500) {
-      for (let cell of gameMap) {
-        let [x, y] = cell.split('.')
-        const color = colorProgress(fColor, bColor, (500 - msClock) / 500)
-        renderSquare(x, y, color)
-      }
-    }
-  }
-
-  let i = 0
-  for (; i < clickStamps.length; ++i) {
-    if ((d - clickStamps[i]) / 1000 > 10) {
-      break
-    }
   }
 
   clock = (d - startTime) / 1000
 
   if (clock > 0) {
-    clockDiv.textContent = textNumber(msClock / 1000)
+    healthbarDiv.style.width = (100 * msClock) / (endTime - startTime) + '%'
   } else {
-    clockDiv.textContent = '0.00'
+    healthbarDiv.style.width = '0%'
   }
-
-  speed = i / (clock < 10 ? clock || 1 : 10)
-  accuracy = clicks ? clicks / (clicks + misses) : 1
-
-  const tSpeed = textNumber(speed)
-  const tClicks = String(clicks)
-  const tAccuracy = textNumber(accuracy)
-
-  infoDiv.textContent = `${tSpeed} / ${tClicks} / ${tAccuracy}`
 
   requestAnimationFrame(run)
 }
@@ -181,7 +159,7 @@ function randomCell() {
   const index = Math.floor(Math.random() * gameMap.length)
   const cell = gameMap[index]
   const [x, y] = cell.split('.')
-  renderSquare(x, y, aColor)
+  renderSquare(x, y, squareColor)
   gameMap.splice(index, 1)
 }
 
@@ -192,7 +170,8 @@ function start(reset = false) {
     return
   }
 
-  clockDiv.classList.remove('gameover')
+  infoDiv.classList.add('hidden')
+  infoDiv.innerHTML = ''
 
   gameMap = []
   for (let y = 0; y < h; ++y) {
@@ -217,11 +196,11 @@ function start(reset = false) {
   state = 'RUNNING'
   clock = 0.0
 
-  msToLife = 350
+  msToLife = 250
 
   startTime = new Date()
   endTime = new Date()
-  endTime.setSeconds(endTime.getSeconds() + 16)
+  endTime.setSeconds(endTime.getSeconds() + 32)
 
   clickTime = startTime
   hitTime = startTime
@@ -231,6 +210,8 @@ function start(reset = false) {
   requestAnimationFrame(run)
 }
 
+let cX, cY
+
 function hit(event) {
   clicks += 1
 
@@ -239,12 +220,18 @@ function hit(event) {
     if (event instanceof TouchEvent) {
       x = event.touches[0].clientX - canvasDiv.offsetLeft
       y = event.touches[0].clientY - canvasDiv.offsetTop
-    } else {
+    } else if (event) {
       x = event.offsetX
       y = event.offsetY
+    } else {
+      x = cX - canvasDiv.offsetLeft
+      y = cY - canvasDiv.offsetTop
     }
 
-    if (x == 0 || y == 0 || x == this.width || y == this.height) {
+    const cellX = Math.floor((x - (x % (cellSize + bSize))) / cellSize)
+    const cellY = Math.floor((y - (y % (cellSize + bSize))) / cellSize)
+
+    if (gameMap.includes(`${cellX}.${cellY}`) || cellY >= h || cellX >= w) {
       endTime.setMilliseconds(endTime.getMilliseconds() - msToLife)
 
       misses += 1
@@ -252,21 +239,13 @@ function hit(event) {
     } else {
       endTime.setMilliseconds(endTime.getMilliseconds() + msToLife)
 
-      const cellX = Math.floor((x - (x % (cellSize + bSize))) / cellSize)
-      const cellY = Math.floor((y - (y % (cellSize + bSize))) / cellSize)
+      hitTime = new Date()
+      missStreak = 0
 
-      if (gameMap.includes(`${cellX}.${cellY}`) || cellY >= h || cellX >= w) {
-        misses += 1
-        missStreak += 1
-      } else {
-        hitTime = new Date()
-        missStreak = 0
+      renderSquare(cellX, cellY, fillColor)
+      randomCell()
 
-        renderSquare(cellX, cellY, fColor)
-        randomCell()
-
-        gameMap.push(`${cellX}.${cellY}`)
-      }
+      gameMap.push(`${cellX}.${cellY}`)
     }
 
     clickTime = new Date()
@@ -276,13 +255,13 @@ function hit(event) {
       gameover()
     }
 
-    if (msToLife > 250) {
+    if (msToLife > 200) {
       msToLife -= 0.8
-    } else if (msToLife > 200) {
-      msToLife -= 0.125
     } else if (msToLife > 166) {
-      msToLife -= 1 / 150
+      msToLife -= 0.125
     } else if (msToLife > 142) {
+      msToLife -= 1 / 150
+    } else if (msToLife > 125) {
       msToLife -= 0.0016
     }
   } else {
@@ -296,9 +275,7 @@ function hit(event) {
   }
 }
 
-render(bColor, aColor)
-
-let cX, cY
+render(borderColor, squareColor)
 
 canvasDiv.addEventListener('mousemove', (e) => {
   cX = e.clientX
@@ -319,14 +296,7 @@ document.body.addEventListener('keydown', (e) => {
   if (['Space', 'Escape'].includes(e.code)) {
     start(true)
   } else if (['KeyZ', 'KeyX', 'KeyC', 'KeyV'].includes(e.code)) {
-    const event = new MouseEvent('mousedown', {
-      view: window,
-      bubbles: true,
-      cancelable: true,
-      clientX: cX,
-      clientY: cY
-    })
-    canvasDiv.dispatchEvent(event)
+    hit(null)
   }
 })
 window.addEventListener('resize', (_) => {
@@ -342,7 +312,7 @@ window.addEventListener('resize', (_) => {
     canvasDiv.height = h * (cellSize + bSize) + bSize
     canvasDiv.width = w * (cellSize + bSize) + bSize
 
-    render(bColor, aColor)
+    render(borderColor, squareColor)
   }
 })
 
