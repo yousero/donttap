@@ -115,10 +115,10 @@ function gameover() {
   speed = clicks / deltaTime
   accuracy = clicks ? clicks / (clicks + misses) : 1
 
-  const minutes = Math.round(deltaTime / 60)
+  const minutes = Math.floor(deltaTime / 60)
 
   if (minutes > 0) {
-    const seconds = Math.round(deltaTime) % 60
+    const seconds = Math.floor(deltaTime) % 60
     addInfo('time', `${minutes}:${seconds}`)
   } else {
     addInfo('time', textNumber(deltaTime))
