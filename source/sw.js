@@ -23,24 +23,16 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   event.respondWith(
-    fetch(event.request.clone()).catch(() => {
-      return caches.open(CURRENT_CACHES['read-through']).then((cache) =>
-        cache
-          .match(event.request)
-          .then((response) => {
-
-            if (response) {
-              return response
-            }
-            return 
-          })
-          .then((response) => {
-            if (response.status < 400) {
-              cache.put(event.request, response.clone())
-            }
-            return response
-          })
-      )      
-    })    
+    fetch(event.request.clone())
+      .then((response) => {
+        if (response.status < 400) {
+          cache.put(event.request, response.clone())
+        }
+        return response
+      })
+      .catch(() => {
+        return caches.open(CURRENT_CACHES['read-through'])
+          .then((cache) => cache.match(event.request))
+      })
   )
 })
