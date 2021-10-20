@@ -112,28 +112,30 @@ function gameover() {
     healthbarDiv.style.width = '0%'
     render(borderColor, squareColor)
 
-    const deltaTime = (endTime - startTime) / 1000
+    if (clicks) {
+      const deltaTime = (endTime - startTime) / 1000
 
-    speed = clicks / deltaTime
-    accuracy = clicks ? clicks / (clicks + misses) : 1
+      speed = clicks / deltaTime
+      accuracy = clicks ? clicks / (clicks + misses) : 1
 
-    const minutes = Math.floor(deltaTime / 60)
+      const minutes = Math.floor(deltaTime / 60)
 
-    if (minutes > 0) {
-      let seconds = Math.floor(deltaTime) % 60
-      if (seconds < 10) {
-        seconds = '0' + seconds
+      if (minutes > 0) {
+        let seconds = Math.floor(deltaTime) % 60
+        if (seconds < 10) {
+          seconds = '0' + seconds
+        }
+        addInfo('time', `${minutes}:${seconds}`)
+      } else {
+        addInfo('time', textNumber(deltaTime) + 's')
       }
-      addInfo('time', `${minutes}:${seconds}`)
-    } else {
-      addInfo('time', textNumber(deltaTime))
-    }
 
-    addInfo('clicks', String(clicks))
-    addInfo('speed', textNumber(speed))
-    addInfo('accuracy', textNumber(accuracy * 100) + '%')
-    
-    infoDiv.classList.remove('hidden')
+      addInfo('clicks', String(clicks))
+      addInfo('speed', textNumber(speed))
+      addInfo('accuracy', textNumber(accuracy * 100) + '%')
+      
+      infoDiv.classList.remove('hidden')
+    }    
   }
 }
 
