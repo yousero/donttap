@@ -1,3 +1,4 @@
+
 const CACHE_VERSION = 5
 const CURRENT_CACHES = {
   'read-through': 'read-through-cache-v' + CACHE_VERSION

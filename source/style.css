@@ -95,6 +95,59 @@ a:hover {
   height: 100%;
 }
 
+#settings {
+  padding: 20px;
+  border: 1px solid whitesmoke;
+  margin-top: 20px;
+}
+
+#settings input {
+  outline: 0;
+  border: 0;
+  padding: 0;
+  width: 80%;
+  font-size: 30px;
+  font-family: monospace;
+  line-height: 1;
+  background: rgba(241,247,255,0.1);
+  color: #f1f7ff;
+}
+
+#settings button {
+  background: #f1f7ff;
+  color: #000107;
+  
+  outline: 0;
+  border: 0;
+  padding: 0;
+  margin: 5px;
+  
+  font-size: 30px;
+  font-family: sans-serif;
+  font-weight: 600;
+  line-height: 1;
+
+  cursor: pointer;
+}
+
+.params {
+  display: flex;
+}
+
+.param-cell {
+  width: 25%;
+}
+
+.param-label {
+  font-size: 20px;
+  line-height: 1.5;
+  color: #abb1ba;
+}
+
+.debug-mode {
+  padding-top: 15px;
+}
+
 @media screen and (max-width: 445px) {
   #header {
     height: 60px;

@@ -1,3 +1,4 @@
+
 const appDiv = document.getElementById('app')
 const canvasDiv = document.getElementById('canvas')
 const healthbarDiv = document.getElementById('healthbar')
@@ -12,21 +13,27 @@ const squareColor = '#00BFFF'
 healthbarDiv.style.backgroundColor = fillColor
 healthbarDiv.style.width = '0%'
 
-const h = 4
-const w = 4
+let h = 4
+let w = 4
 
 const bSize = 0
 
 let cellSize = 100
 
-if (window.innerWidth < 446) {
-  cellSize = 72
-} else if (window.innerWidth > 1024) {
-  cellSize = 128
+function refreshCanvas() {
+  cellSize = 100
+
+  if (window.innerWidth < 446) {
+    cellSize = 72
+  } else if (window.innerWidth > 1024) {
+    cellSize = 128
+  }
+
+  canvasDiv.height = h * (cellSize + bSize) + bSize
+  canvasDiv.width = w * (cellSize + bSize) + bSize
 }
 
-canvasDiv.height = h * (cellSize + bSize) + bSize
-canvasDiv.width = w * (cellSize + bSize) + bSize
+refreshCanvas()
 
 function renderSquare(x, y, cColor) {
   ctx.fillStyle = cColor
@@ -72,6 +79,7 @@ let clickTime = new Date()
 let hitTime = new Date()
 
 let startTime = new Date()
+let hpTime = new Date()
 let endTime = new Date()
 endTime.setSeconds(-120)
 
@@ -80,7 +88,7 @@ let gameMap = []
 
 const infoDiv = document.getElementById('information')
 
-function addInfo(tlabel, tvalue) {
+function addInfo(tlabel, tvalue, title=null) {
   const el = document.createElement('div')
   el.classList.add('stats')
   const label = document.createElement('div')
@@ -91,6 +99,7 @@ function addInfo(tlabel, tvalue) {
   value.classList.add('stats-value')
   value.textContent = tvalue
   el.appendChild(value)
+  el.title = title
   infoDiv.appendChild(el)
 }
 
@@ -131,11 +140,26 @@ function gameover() {
       }
 
       addInfo('clicks', String(clicks))
-      addInfo('speed', textNumber(speed))
-      addInfo('accuracy', textNumber(accuracy * 100) + '%')
+      addInfo('speed', textNumber(speed), 'clicks per second')
+      addInfo('accuracy', textNumber(accuracy * 100) + '%', misses + ' misses')
       
       infoDiv.classList.remove('hidden')
-    }    
+
+      if (localStorage) {
+        let records = []
+        if (localStorage.records) {
+          try {
+            records = JSON.parse(localStorage.records)  
+          } catch (SyntaxError) {
+            delete localStorage.records
+          }
+        }
+        if (records.length >= 0) {
+          records.push([endTime.getTime(), deltaTime, clicks, misses].join(';'))
+          localStorage.records = JSON.stringify(records)
+        }
+      }
+    }
   }
 }
 
@@ -155,7 +179,11 @@ function run() {
   clock = (d - startTime) / 1000
 
   if (clock > 0) {
-    healthbarDiv.style.width = (100 * msClock) / (endTime - startTime) + '%'
+    if (endTime - hpTime >= 110000) {
+      hpTime.setMilliseconds(hpTime.getMilliseconds() + 55000)
+    }
+    const hp = (100 * msClock) / (endTime - hpTime)
+    healthbarDiv.style.width = hp + '%'
   } else {
     healthbarDiv.style.width = '0%'
   }
@@ -171,7 +199,7 @@ function randomCell() {
   gameMap.splice(index, 1)
 }
 
-const activeCells = 3
+let activeCells = 3
 
 function start(reset = false) {
   if (!reset && new Date() - endTime < 1500) {
@@ -207,6 +235,7 @@ function start(reset = false) {
   msToLife = 250
 
   startTime = new Date()
+  hpTime = new Date()
   endTime = new Date()
   endTime.setSeconds(endTime.getSeconds() + 32)
 
@@ -217,8 +246,6 @@ function start(reset = false) {
 
   requestAnimationFrame(run)
 }
-
-let cX, cY
 
 function hit(event) {
   clicks += 1
@@ -231,9 +258,6 @@ function hit(event) {
     } else if (event) {
       x = event.offsetX
       y = event.offsetY
-    } else {
-      x = cX - canvasDiv.offsetLeft
-      y = cY - canvasDiv.offsetTop
     }
 
     const cellX = Math.floor((x - (x % (cellSize + bSize))) / cellSize)
@@ -285,10 +309,64 @@ function hit(event) {
 
 render(borderColor, squareColor)
 
-canvasDiv.addEventListener('mousemove', (e) => {
-  cX = e.clientX
-  cY = e.clientY
+const settingsDiv = document.getElementById('settings')
+
+// const okSettings = settingsDiv.querySelector('#settings-ok')
+// okSettings.addEventListener('click', (e) => {
+//   const sizeSettings = settingsDiv.querySelector('input[name="size"]')
+//   const numberSettings = settingsDiv.querySelector('input[name="number"]')
+//   const size = parseInt(sizeSettings.value)
+//   if (size > 1) {
+//     h = w = size
+//     refreshCanvas()
+//     render(borderColor, squareColor)
+//   }
+//   const number = parseInt(numberSettings.value)
+//   if (number > 0 && number < w) {
+//     activeCells = number
+//   }
+// })
+
+const toggleBar = settingsDiv.querySelector('#toggle-bar')
+toggleBar.addEventListener('click', function(e) {
+  const width = parseInt(healthbarDiv.style.width)
+  if ((width + 30) > 100) {
+    healthbarDiv.style.width = '0%'
+  } else {
+    healthbarDiv.style.width = String(width + 30) + '%'
+  }  
 })
+
+const showInfo = settingsDiv.querySelector('#toggle-info')
+showInfo.addEventListener('click', function(e) {
+  if (!infoDiv.innerHTML) {
+    addInfo('time', '0' + 's')
+    addInfo('clicks', '0')
+    addInfo('speed', '0')
+    addInfo('accuracy', String(Math.floor(accuracy * 100)) + '%')
+  }
+  infoDiv.classList.toggle('hidden')
+})
+
+const firstRound = settingsDiv.querySelector('#show-first-round')
+firstRound.addEventListener('click', function(e) {
+  infoDiv.classList.add('hidden')
+  infoDiv.innerHTML = ''
+
+  gameMap = []
+  for (let y = 0; y < h; ++y) {
+    for (let x = 0; x < w; ++x) {
+      gameMap.push(`${x}.${y}`)
+    }
+  }
+
+  render()
+
+  for (let i = 0; i < activeCells; ++i) {
+    randomCell()
+  }
+})
+
 canvasDiv.addEventListener('touchstart', (e) => {
   hit(e)
   e.preventDefault()
@@ -303,23 +381,11 @@ canvasDiv.parentElement.addEventListener('contextmenu', (e) => {
 document.body.addEventListener('keydown', (e) => {
   if (['Space', 'Escape'].includes(e.code)) {
     start(true)
-  } else if (['KeyZ', 'KeyX', 'KeyC', 'KeyV'].includes(e.code)) {
-    hit(null)
   }
 })
 window.addEventListener('resize', (_) => {
   if (state != 'RUNNING') {
-    cellSize = 100
-
-    if (window.innerWidth < 446) {
-      cellSize = 72
-    } else if (window.innerWidth > 1024) {
-      cellSize = 128
-    }
-
-    canvasDiv.height = h * (cellSize + bSize) + bSize
-    canvasDiv.width = w * (cellSize + bSize) + bSize
-
+    refreshCanvas()
     render(borderColor, squareColor)
   }
 })
