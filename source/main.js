@@ -403,5 +403,7 @@ window.addEventListener('resize', (_) => {
 })
 
 if ('serviceWorker' in navigator && window.location.protocol != 'file:') {
-  navigator.serviceWorker.register('sw.js')
+  navigator.serviceWorker.register(
+    new URL('sw.js')
+  )
 }
