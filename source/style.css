@@ -87,7 +87,7 @@ a:hover {
 }
 
 #healthbar-wrapper {
-  height: 80px;
+  height: 55px;
   margin: 0 20px;
 }
 
@@ -139,7 +139,7 @@ a:hover {
 }
 
 .param-label {
-  font-size: 20px;
+  font-size: 16px;
   line-height: 1.5;
   color: #abb1ba;
 }
