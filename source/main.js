@@ -5,7 +5,7 @@ const healthbarDiv = document.getElementById('healthbar')
 
 const ctx = canvasDiv.getContext('2d')
 
-const borderColor = '#ff0107'
+const borderColor = '#990003'
 const fillColor = '#f1f7ff'
 const activeColor = '#000107'
 const squareColor = '#00BFFF'
@@ -20,6 +20,8 @@ const bSize = 0
 
 let cellSize = 100
 
+let activeCells = 3
+
 function refreshCanvas() {
   cellSize = 100
 
@@ -28,6 +30,8 @@ function refreshCanvas() {
   } else if (window.innerWidth > 1024) {
     cellSize = 128
   }
+
+  cellSize = 100
 
   canvasDiv.height = h * (cellSize + bSize) + bSize
   canvasDiv.width = w * (cellSize + bSize) + bSize
@@ -99,7 +103,11 @@ function addInfo(tlabel, tvalue, title=null) {
   value.classList.add('stats-value')
   value.textContent = tvalue
   el.appendChild(value)
-  el.title = title
+
+  if (title) {
+    el.title = title
+  }
+
   infoDiv.appendChild(el)
 }
 
@@ -179,11 +187,15 @@ function run() {
   clock = (d - startTime) / 1000
 
   if (clock > 0) {
-    if (endTime - hpTime >= 110000) {
-      hpTime.setMilliseconds(hpTime.getMilliseconds() + 55000)
-    }
-    const hp = (100 * msClock) / (endTime - hpTime)
+    const dt = endTime - hpTime
+    const hp = (100 * msClock) / dt
     healthbarDiv.style.width = hp + '%'
+
+    if (dt >= 60000) {
+      if (hp <= 25) {
+        hpTime.setMilliseconds(hpTime.getMilliseconds() + dt * 6.5/10)
+      }
+    }
   } else {
     healthbarDiv.style.width = '0%'
   }
@@ -198,8 +210,6 @@ function randomCell() {
   renderSquare(x, y, squareColor)
   gameMap.splice(index, 1)
 }
-
-let activeCells = 3
 
 function start(reset = false) {
   if (!reset && new Date() - endTime < 1500) {
@@ -252,9 +262,11 @@ function hit(event) {
 
   if (state == 'RUNNING') {
     let x, y
-    if (event instanceof TouchEvent) {
-      x = event.touches[0].clientX - canvasDiv.offsetLeft
-      y = event.touches[0].clientY - canvasDiv.offsetTop
+    if ('TouchEvent' in window) {
+      if (event instanceof TouchEvent) {
+        x = event.touches[0].clientX - canvasDiv.offsetLeft
+        y = event.touches[0].clientY - canvasDiv.offsetTop
+      }
     } else if (event) {
       x = event.offsetX
       y = event.offsetY

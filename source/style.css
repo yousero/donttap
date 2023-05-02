@@ -69,7 +69,7 @@ a:hover {
 
   display: flex;
   flex-flow: row wrap;
-  justify-content: space-between;
+  justify-content: space-evenly;
 }
 
 .stats {
@@ -87,7 +87,7 @@ a:hover {
 }
 
 #healthbar-wrapper {
-  height: 40px;
+  height: 80px;
   margin: 0 20px;
 }
 

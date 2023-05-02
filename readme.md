@@ -1,6 +1,6 @@
 # donttap
 
-Fast action tapping browser game. Click on Black squares as fast as possible.
+Fast action tapping game for web-browser. Just click on active squares as fast as possible.
 
 insperation of https://github.com/Sentero-esp12/donttap-2019
 
