@@ -55,7 +55,9 @@ a:hover {
 }
 
 .canvas-wrapper {
+  display: flex;
   padding: 20px;
+  justify-content: center;
   user-select: none;
 }
 
@@ -73,7 +75,7 @@ a:hover {
 }
 
 .stats {
-  padding: 4px;
+  padding: 10px;
 }
 
 .stats-label {
