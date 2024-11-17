@@ -40,6 +40,7 @@ function refreshCanvas() {
 refreshCanvas()
 
 function renderSquare(x, y, cColor) {
+
   ctx.fillStyle = cColor
   const rX = y * (cellSize + bSize) + bSize
   const rY = x * (cellSize + bSize) + bSize
@@ -262,15 +263,18 @@ function hit(event) {
 
   if (state == 'RUNNING') {
     let x, y
-    if ('TouchEvent' in window) {
-      if (event instanceof TouchEvent) {
-        x = event.touches[0].clientX - canvasDiv.offsetLeft
-        y = event.touches[0].clientY - canvasDiv.offsetTop
-      }
-    } else if (event) {
+
+    if (event) {
       x = event.offsetX
       y = event.offsetY
-    }
+
+      if ('TouchEvent' in window) {
+        if (event instanceof TouchEvent) {
+          x = event.touches[0].clientX - canvasDiv.offsetLeft
+          y = event.touches[0].clientY - canvasDiv.offsetTop
+        }
+      }
+    } 
 
     const cellX = Math.floor((x - (x % (cellSize + bSize))) / cellSize)
     const cellY = Math.floor((y - (y % (cellSize + bSize))) / cellSize)
