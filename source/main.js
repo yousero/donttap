@@ -179,7 +179,7 @@ function run() {
 
   const d = new Date()
 
-  msClock = endTime - d
+  let msClock = endTime - d
 
   if (msClock <= 0) {
     return gameover()
