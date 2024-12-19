@@ -113,7 +113,7 @@ function addInfo(tlabel, tvalue, title=null) {
 }
 
 function textNumber(number) {
-  const tNumber = String(Math.round(number * 100) / 100)
+  let tNumber = String(Math.round(number * 100) / 100)
 
   if (tNumber.slice(-2, -1) == '.') tNumber += '0'
   if (tNumber.slice(-3, -2) != '.') tNumber += '.00'
