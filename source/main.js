@@ -1,4 +1,3 @@
-
 const appDiv = document.getElementById('app')
 const canvasDiv = document.getElementById('canvas')
 const healthbarDiv = document.getElementById('healthbar')
@@ -23,15 +22,13 @@ let cellSize = 100
 let activeCells = 3
 
 function refreshCanvas() {
-  cellSize = 100
-
   if (window.innerWidth < 446) {
-    cellSize = 72
+    cellSize = 64
   } else if (window.innerWidth > 1024) {
     cellSize = 128
+  } else {
+    cellSize = 100
   }
-
-  cellSize = 100
 
   canvasDiv.height = h * (cellSize + bSize) + bSize
   canvasDiv.width = w * (cellSize + bSize) + bSize
@@ -75,7 +72,28 @@ let accuracy = 1
 const breakPoint = 4
 let missStreak = 0
 
-let state = 'STOP'
+const GAME_STATES = {
+  STOP: 'STOP',
+  RUNNING: 'RUNNING',
+  GAMEOVER: 'GAMEOVER',
+  PAUSED: 'PAUSED'
+}
+
+const GAME_CONFIG = {
+  INITIAL_MS_TO_LIFE: 250,
+  MIN_MS_TO_LIFE: 125,
+  BREAK_POINT: 4,
+  INITIAL_ACTIVE_CELLS: 3,
+  GRID_SIZE: 4,
+  SPEED_INCREASE_RATES: {
+    FAST: 0.8,
+    MEDIUM: 0.125,
+    SLOW: 1/150,
+    VERY_SLOW: 0.0016
+  }
+}
+
+let state = GAME_STATES.STOP
 let clock = 0.0
 
 let msToLife = 250
@@ -121,55 +139,71 @@ function textNumber(number) {
   return tNumber
 }
 
-function gameover() {
-  if (state == 'RUNNING') {
-    endTime = new Date()
-    state = 'GAMEOVER'
-    clock = 0.0
+function saveGameRecord(endTime, deltaTime, clicks, misses) {
+  if (!localStorage) return
 
-    healthbarDiv.style.width = '0%'
-    render(borderColor, squareColor)
-
-    if (clicks) {
-      const deltaTime = (endTime - startTime) / 1000
-
-      speed = clicks / deltaTime
-      accuracy = clicks ? clicks / (clicks + misses) : 1
-
-      const minutes = Math.floor(deltaTime / 60)
-
-      if (minutes > 0) {
-        let seconds = Math.floor(deltaTime) % 60
-        if (seconds < 10) {
-          seconds = '0' + seconds
-        }
-        addInfo('time', `${minutes}:${seconds}`)
-      } else {
-        addInfo('time', textNumber(deltaTime) + 's')
-      }
-
-      addInfo('clicks', String(clicks))
-      addInfo('speed', textNumber(speed), 'clicks per second')
-      addInfo('accuracy', textNumber(accuracy * 100) + '%', misses + ' misses')
-      
-      infoDiv.classList.remove('hidden')
-
-      if (localStorage) {
-        let records = []
-        if (localStorage.records) {
-          try {
-            records = JSON.parse(localStorage.records)  
-          } catch (SyntaxError) {
-            delete localStorage.records
-          }
-        }
-        if (records.length >= 0) {
-          records.push([endTime.getTime(), deltaTime, clicks, misses].join(';'))
-          localStorage.records = JSON.stringify(records)
-        }
-      }
-    }
+  let records = []
+  try {
+    records = JSON.parse(localStorage.records || '[]')
+  } catch (error) {
+    console.error('Failed to parse records:', error)
+    localStorage.records = '[]'
+    return
   }
+
+  records.push({
+    timestamp: endTime.getTime(),
+    duration: deltaTime,
+    clicks,
+    misses,
+    accuracy: clicks / (clicks + misses),
+    cps: clicks / deltaTime
+  })
+
+  // Keep only the last 100 records
+  if (records.length > 100) {
+    records = records.slice(-100)
+  }
+
+  localStorage.records = JSON.stringify(records)
+}
+
+function gameover() {
+  if (state !== GAME_STATES.RUNNING) return
+
+  endTime = new Date()
+  state = GAME_STATES.GAMEOVER
+  clock = 0.0
+
+  healthbarDiv.style.width = '0%'
+  render(borderColor, squareColor)
+
+  if (clicks) {
+    const deltaTime = (endTime - startTime) / 1000
+    speed = clicks / deltaTime
+    accuracy = clicks / (clicks + misses)
+
+    displayGameStats(deltaTime, clicks, misses, speed, accuracy)
+    saveGameRecord(endTime, deltaTime, clicks, misses)
+  }
+}
+
+function displayGameStats(deltaTime, clicks, misses, speed, accuracy) {
+  infoDiv.innerHTML = ''
+  
+  const minutes = Math.floor(deltaTime / 60)
+  if (minutes > 0) {
+    const seconds = String(Math.floor(deltaTime) % 60).padStart(2, '0')
+    addInfo('time', `${minutes}:${seconds}`)
+  } else {
+    addInfo('time', textNumber(deltaTime) + 's')
+  }
+
+  addInfo('clicks', String(clicks))
+  addInfo('speed', textNumber(speed), 'clicks per second')
+  addInfo('accuracy', textNumber(accuracy * 100) + '%', `${misses} misses`)
+  
+  infoDiv.classList.remove('hidden')
 }
 
 function run() {
@@ -258,64 +292,64 @@ function start(reset = false) {
   requestAnimationFrame(run)
 }
 
+function adjustSpeed() {
+  if (msToLife > 200) {
+    msToLife -= GAME_CONFIG.SPEED_INCREASE_RATES.FAST
+  } else if (msToLife > 166) {
+    msToLife -= GAME_CONFIG.SPEED_INCREASE_RATES.MEDIUM
+  } else if (msToLife > 142) {
+    msToLife -= GAME_CONFIG.SPEED_INCREASE_RATES.SLOW
+  } else if (msToLife > GAME_CONFIG.MIN_MS_TO_LIFE) {
+    msToLife -= GAME_CONFIG.SPEED_INCREASE_RATES.VERY_SLOW
+  }
+}
+
 function hit(event) {
-  clicks += 1
-
-  if (state == 'RUNNING') {
-    let x, y
-
-    if (event) {
-      x = event.offsetX
-      y = event.offsetY
-
-      if ('TouchEvent' in window) {
-        if (event instanceof TouchEvent) {
-          x = event.touches[0].clientX - canvasDiv.offsetLeft
-          y = event.touches[0].clientY - canvasDiv.offsetTop
-        }
-      }
-    } 
-
-    const cellX = Math.floor((x - (x % (cellSize + bSize))) / cellSize)
-    const cellY = Math.floor((y - (y % (cellSize + bSize))) / cellSize)
-
-    if (gameMap.includes(`${cellX}.${cellY}`) || cellY >= h || cellX >= w) {
-      endTime.setMilliseconds(endTime.getMilliseconds() - msToLife)
-
-      misses += 1
-      missStreak += 1
-    } else {
-      endTime.setMilliseconds(endTime.getMilliseconds() + msToLife)
-
-      hitTime = new Date()
-      missStreak = 0
-
-      renderSquare(cellX, cellY, fillColor)
-      randomCell()
-
-      gameMap.push(`${cellX}.${cellY}`)
-    }
-
-    clickTime = new Date()
-    clickStamps.unshift(clickTime)
-
-    if (missStreak >= breakPoint) {
-      gameover()
-    }
-
-    if (msToLife > 200) {
-      msToLife -= 0.8
-    } else if (msToLife > 166) {
-      msToLife -= 0.125
-    } else if (msToLife > 142) {
-      msToLife -= 1 / 150
-    } else if (msToLife > 125) {
-      msToLife -= 0.0016
-    }
-  } else {
+  if (state !== GAME_STATES.RUNNING) {
     start()
+    return
   }
 
+  clicks += 1
+  let x, y
+
+  if (event) {
+    x = event.offsetX
+    y = event.offsetY
+
+    if ('TouchEvent' in window && event instanceof TouchEvent) {
+      const rect = canvasDiv.getBoundingClientRect()
+      x = event.touches[0].clientX - rect.left
+      y = event.touches[0].clientY - rect.top
+    }
+  }
+
+  const cellX = Math.floor((x - (x % (cellSize + bSize))) / cellSize)
+  const cellY = Math.floor((y - (y % (cellSize + bSize))) / cellSize)
+
+  if (gameMap.includes(`${cellX}.${cellY}`) || cellY >= h || cellX >= w) {
+    endTime.setMilliseconds(endTime.getMilliseconds() - msToLife)
+    misses += 1
+    missStreak += 1
+  } else {
+    endTime.setMilliseconds(endTime.getMilliseconds() + msToLife)
+    hitTime = new Date()
+    missStreak = 0
+    renderSquare(cellX, cellY, fillColor)
+    randomCell()
+    gameMap.push(`${cellX}.${cellY}`)
+  }
+
+  clickTime = new Date()
+  clickStamps.unshift(clickTime)
+
+  if (missStreak >= GAME_CONFIG.BREAK_POINT) {
+    gameover()
+  }
+
+  adjustSpeed()
+
+  // Clear any text selection
   if (window.getSelection) {
     window.getSelection().removeAllRanges()
   } else if (document.selection) {
@@ -383,29 +417,54 @@ firstRound.addEventListener('click', function(e) {
   }
 })
 
-canvasDiv.addEventListener('touchstart', (e) => {
+function initGame() {
+  h = w = GAME_CONFIG.GRID_SIZE
+  activeCells = GAME_CONFIG.INITIAL_ACTIVE_CELLS
+  msToLife = GAME_CONFIG.INITIAL_MS_TO_LIFE
+  
+  refreshCanvas()
+  render(borderColor, squareColor)
+  
+  // Initialize event listeners
+  canvasDiv.addEventListener('touchstart', handleTouch, { passive: false })
+  canvasDiv.addEventListener('mousedown', handleClick)
+  canvasDiv.parentElement.addEventListener('contextmenu', preventContextMenu)
+  document.body.addEventListener('keydown', handleKeyPress)
+  window.addEventListener('resize', handleResize)
+  
+  // Initialize service worker
+  if ('serviceWorker' in navigator && window.location.protocol !== 'file:') {
+    navigator.serviceWorker.register(new URL('./sw.js', import.meta.url))
+  }
+}
+
+function handleTouch(e) {
   hit(e)
   e.preventDefault()
   return false
-})
-canvasDiv.addEventListener('mousedown', hit)
-canvasDiv.parentElement.addEventListener('contextmenu', (e) => {
+}
+
+function handleClick(e) {
+  hit(e)
+}
+
+function preventContextMenu(e) {
   e.preventDefault()
   return false
-})
+}
 
-document.body.addEventListener('keydown', (e) => {
-  if (['Space', 'Escape'].includes(e.code)) {
+function handleKeyPress(e) {
+  if (e.code === 'Space' || e.code === 'Escape') {
     start(true)
   }
-})
-window.addEventListener('resize', (_) => {
-  if (state != 'RUNNING') {
+}
+
+function handleResize() {
+  if (state !== GAME_STATES.RUNNING) {
     refreshCanvas()
     render(borderColor, squareColor)
   }
-})
-
-if ('serviceWorker' in navigator && window.location.protocol != 'file:') {
-  navigator.serviceWorker.register(new URL('./sw.js', import.meta.url))
 }
+
+// Initialize the game
+initGame()
