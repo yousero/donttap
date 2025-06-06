@@ -1,11 +1,14 @@
 * {
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
 html,
 body {
   margin: 0;
   padding: 0;
+  overflow-x: hidden;
+  min-height: 100vh;
 }
 
 body {
@@ -14,6 +17,8 @@ body {
   line-height: 1;
   letter-spacing: 1.2px;
   background: #000107;
+  display: flex;
+  flex-direction: column;
 }
 
 h1,
@@ -43,15 +48,21 @@ a:hover {
 }
 
 #header {
-  height: 90px;
+  height: 60px;
+  min-height: 60px;
 }
 
 #main {
   display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
 }
 
 #board {
   margin: auto;
+  width: 512px;
 }
 
 .canvas-wrapper {
@@ -63,102 +74,136 @@ a:hover {
 
 #canvas {
   cursor: url(circle3.cur) 8 8, auto;
+  width: 512px;
+  height: 512px;
 }
 
 #information {
-  padding: 0 20px;
+  padding: 0 10px;
   color: #f1f7ff;
-
   display: flex;
   flex-flow: row wrap;
   justify-content: space-evenly;
+  gap: 10px;
 }
 
 .stats {
-  padding: 10px;
+  padding: 5px;
+  min-width: 80px;
+  text-align: center;
 }
 
 .stats-label {
-  font-size: 20px;
-  line-height: 1.5;
+  font-size: 16px;
+  line-height: 1.2;
   color: #abb1ba;
+  margin-bottom: 4px;
 }
 
 .stats-value {
-  font-size: 30px;
+  font-size: 24px;
+  line-height: 1;
 }
 
 #healthbar-wrapper {
   height: 55px;
-  margin: 0 20px;
+  width: 512px;
+  margin: 0 auto;
 }
 
 #healthbar {
   height: 100%;
+  width: 0%;
+  background-color: #f1f7ff;
 }
 
 #settings {
-  padding: 20px;
-  border: 1px solid whitesmoke;
-  margin-top: 20px;
+  padding: 15px;
+  border: 1px solid rgba(241,247,255,0.2);
+  margin: 15px;
+  border-radius: 4px;
 }
 
 #settings input {
   outline: 0;
   border: 0;
-  padding: 0;
-  width: 80%;
-  font-size: 30px;
+  padding: 5px;
+  width: 100%;
+  font-size: 24px;
   font-family: monospace;
   line-height: 1;
   background: rgba(241,247,255,0.1);
   color: #f1f7ff;
+  border-radius: 4px;
 }
 
 #settings button {
   background: #f1f7ff;
   color: #000107;
-  
   outline: 0;
   border: 0;
-  padding: 0;
+  padding: 8px 15px;
   margin: 5px;
-  
-  font-size: 30px;
+  font-size: 24px;
   font-family: sans-serif;
   font-weight: 600;
   line-height: 1;
-
   cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+#settings button:active {
+  background-color: #d0d6e0;
 }
 
 .params {
   display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .param-cell {
-  width: 25%;
+  flex: 1;
+  min-width: 120px;
 }
 
 .param-label {
-  font-size: 16px;
+  font-size: 14px;
   line-height: 1.5;
   color: #abb1ba;
+  margin-bottom: 5px;
 }
 
 .debug-mode {
   padding-top: 15px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
 }
 
 @media screen and (max-width: 445px) {
   #header {
     height: 60px;
   }
-  #healthbar {
-    margin: 0 10px;
+  #board {
+    width: 100%;
+    max-width: 512px;
+  }
+  #healthbar-wrapper {
+    width: 100%;
+    max-width: 512px;
+    height: 40px;
+    margin: 0 auto;
+    padding: 0 10px;
   }
   .canvas-wrapper {
     padding: 10px;
+  }
+  #canvas {
+    width: 100%;
+    max-width: 512px;
+    height: auto;
   }
   #information {
     padding: 0 10px;
@@ -169,10 +214,49 @@ a:hover {
   .stats-value {
     font-size: 20px;
   }
+  #settings {
+    padding: 10px;
+    margin: 10px;
+  }
+  #settings input,
+  #settings button {
+    font-size: 20px;
+    padding: 6px 12px;
+  }
+  .param-cell {
+    min-width: 100px;
+  }
+  .debug-mode {
+    flex-direction: column;
+  }
+  .debug-mode button {
+    width: 100%;
+  }
+}
+
+@media screen and (min-width: 446px) and (max-width: 1023px) {
+  .stats {
+    min-width: 90px;
+  }
+  .stats-label {
+    font-size: 14px;
+  }
+  .stats-value {
+    font-size: 22px;
+  }
 }
 
 @media screen and (min-width: 1024px) {
   .canvas-wrapper {
     padding: 20px;
+  }
+  .stats {
+    min-width: 100px;
+  }
+  .stats-label {
+    font-size: 16px;
+  }
+  .stats-value {
+    font-size: 28px;
   }
 }

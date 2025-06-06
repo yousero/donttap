@@ -22,13 +22,19 @@ let cellSize = 100
 let activeCells = 3
 
 function refreshCanvas() {
+  const maxWidth = Math.min(window.innerWidth - 20, 600)
+  const maxHeight = window.innerHeight * 0.6
+  
   if (window.innerWidth < 446) {
-    cellSize = 64
+    cellSize = Math.min(64, Math.floor(maxWidth / w))
   } else if (window.innerWidth > 1024) {
-    cellSize = 128
+    cellSize = Math.min(128, Math.floor(maxWidth / w))
   } else {
-    cellSize = 100
+    cellSize = Math.min(100, Math.floor(maxWidth / w))
   }
+
+  const maxCellSize = Math.floor(maxHeight / h)
+  cellSize = Math.min(cellSize, maxCellSize)
 
   canvasDiv.height = h * (cellSize + bSize) + bSize
   canvasDiv.width = w * (cellSize + bSize) + bSize
@@ -304,6 +310,24 @@ function adjustSpeed() {
   }
 }
 
+function getTouchCoordinates(event) {
+  const rect = canvasDiv.getBoundingClientRect()
+  const scaleX = canvasDiv.width / rect.width
+  const scaleY = canvasDiv.height / rect.height
+  
+  let x, y
+  
+  if (event instanceof TouchEvent) {
+    x = (event.touches[0].clientX - rect.left) * scaleX
+    y = (event.touches[0].clientY - rect.top) * scaleY
+  } else {
+    x = event.offsetX * scaleX
+    y = event.offsetY * scaleY
+  }
+  
+  return { x, y }
+}
+
 function hit(event) {
   if (state !== GAME_STATES.RUNNING) {
     start()
@@ -311,18 +335,7 @@ function hit(event) {
   }
 
   clicks += 1
-  let x, y
-
-  if (event) {
-    x = event.offsetX
-    y = event.offsetY
-
-    if ('TouchEvent' in window && event instanceof TouchEvent) {
-      const rect = canvasDiv.getBoundingClientRect()
-      x = event.touches[0].clientX - rect.left
-      y = event.touches[0].clientY - rect.top
-    }
-  }
+  const { x, y } = getTouchCoordinates(event)
 
   const cellX = Math.floor((x - (x % (cellSize + bSize))) / cellSize)
   const cellY = Math.floor((y - (y % (cellSize + bSize))) / cellSize)
@@ -465,6 +478,25 @@ function handleResize() {
     render(borderColor, squareColor)
   }
 }
+
+// Prevent default touch behavior
+document.addEventListener('touchmove', function(e) {
+  if (e.target === canvasDiv) {
+    e.preventDefault()
+  }
+}, { passive: false })
+
+// Handle window resize
+let resizeTimeout
+window.addEventListener('resize', function() {
+  clearTimeout(resizeTimeout)
+  resizeTimeout = setTimeout(function() {
+    if (state !== GAME_STATES.RUNNING) {
+      refreshCanvas()
+      render(borderColor, squareColor)
+    }
+  }, 100)
+})
 
 // Initialize the game
 initGame()
